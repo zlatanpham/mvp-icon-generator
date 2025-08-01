@@ -5,9 +5,9 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'PWA Icon Generator',
+  title: 'MVP Icon Generator',
   description:
-    'Create beautiful icons for your Progressive Web Application with customizable colors and sizes',
+    'Create beautiful icons for your Minimum Viable Product with customizable colors and sizes',
 };
 
 export default function RootLayout({

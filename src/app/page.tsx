@@ -115,7 +115,7 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `pwa-icons-${selectedIcon}.zip`;
+      a.download = `mvp-icons-${selectedIcon}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -312,7 +312,7 @@ export default function Home() {
             <h1 className="text-base font-normal text-gray-700">
               {formatIconName(selectedIcon)} Icon
             </h1>
-            <p className="text-xs text-gray-500">PWA icon generator</p>
+            <p className="text-xs text-gray-500">MVP icon generator</p>
           </div>
           <Button onClick={handleDownload} disabled={isGenerating}>
             <Download className="mr-2 h-4 w-4" />
@@ -447,7 +447,7 @@ export default function Home() {
               <li className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
                 <strong className="text-gray-900">manifest.json</strong> ready
-                for PWA
+                for MVP
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>

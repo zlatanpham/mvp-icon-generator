@@ -14,7 +14,7 @@ const iconSizes: IconSize[] = [
   { name: 'android-chrome-192x192.png', size: 192 },
   { name: 'android-chrome-512x512.png', size: 512 },
 
-  // Additional PWA icons
+  // Additional MVP icons
   { name: 'icon-48x48.png', size: 48 },
   { name: 'icon-72x72.png', size: 72 },
   { name: 'icon-96x96.png', size: 96 },
@@ -225,7 +225,7 @@ export async function generateAllIcons(
   zip.file('html-meta-tags.txt', htmlMeta);
 
   // Generate README
-  const readme = `# PWA Icons
+  const readme = `# MVP Icons
 
 This package contains all the icons needed for your Progressive Web Application.
 
@@ -241,10 +241,10 @@ This package contains all the icons needed for your Progressive Web Application.
 - Favicons: 16x16, 32x32, favicon.ico
 - Apple Touch Icon: 180x180
 - Android Chrome: 192x192, 512x512
-- PWA Icons: 48x48 to 1024x1024
+- MVP Icons: 48x48 to 1024x1024
 - Maskable Icons: 192x192, 512x512
 
-Generated with PWA Icon Generator`;
+Generated with MVP Icon Generator`;
 
   zip.file('README.txt', readme);
 

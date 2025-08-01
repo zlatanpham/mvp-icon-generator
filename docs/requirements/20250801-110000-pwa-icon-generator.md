@@ -1,8 +1,8 @@
-# PWA Icon Generator - Requirements Document
+# MVP Icon Generator - Requirements Document
 
 ## Executive Summary
 
-This document outlines the requirements for a web application that generates Progressive Web Application (PWA) icons. The application will allow users to select icons from the Lucide icon library, customize colors, and download all necessary icon assets for modern web applications in a single package.
+This document outlines the requirements for a web application that generates Minimum Viable Product (MVP) icons. The application will allow users to select icons from the Lucide icon library, customize colors, and download all necessary icon assets for modern web applications in a single package.
 
 ## Business Context and Problem Statement
 
@@ -16,7 +16,7 @@ A simple, user-friendly web application that automates the generation of all nec
 
 ### Target Users
 
-- Web developers building PWAs
+- Web developers building MVPs
 - Designers creating app icons
 - Small businesses and startups needing quick icon solutions
 - Freelancers working on multiple projects
@@ -25,7 +25,7 @@ A simple, user-friendly web application that automates the generation of all nec
 
 ### Primary Stakeholders
 
-- **End Users**: Developers and designers who need PWA icons
+- **End Users**: Developers and designers who need MVP icons
 - **Product Owner**: Responsible for feature prioritization and business value
 - **Development Team**: Implementing the technical solution
 
@@ -123,7 +123,7 @@ A simple, user-friendly web application that automates the generation of all nec
 - android-chrome-192x192.png
 - android-chrome-512x512.png
 
-#### Additional PWA Icons
+#### Additional MVP Icons
 
 - icon-48x48.png
 - icon-72x72.png
@@ -217,32 +217,32 @@ Generate a text file with ready-to-use HTML tags:
 
 ### US1: Icon Selection
 
-**As a** developer  
-**I want to** search and select an icon from Lucide  
+**As a** developer
+**I want to** search and select an icon from Lucide
 **So that** I can use it as my app icon
 
 ### US2: Color Customization
 
-**As a** designer  
-**I want to** customize the background and icon colors  
+**As a** designer
+**I want to** customize the background and icon colors
 **So that** the icon matches my brand identity
 
 ### US3: Preview Changes
 
-**As a** user  
-**I want to** see real-time previews of my customizations  
+**As a** user
+**I want to** see real-time previews of my customizations
 **So that** I can make informed design decisions
 
 ### US4: Quick Download
 
-**As a** developer  
-**I want to** download all icon assets with one click  
+**As a** developer
+**I want to** download all icon assets with one click
 **So that** I can quickly implement them in my project
 
 ### US5: Implementation Guide
 
-**As a** developer  
-**I want to** receive implementation instructions  
+**As a** developer
+**I want to** receive implementation instructions
 **So that** I can correctly add the icons to my web app
 
 ## UI/UX Requirements
@@ -343,7 +343,7 @@ Generate a text file with ready-to-use HTML tags:
 
 1. Basic icon selection from Lucide
 2. Color customization (background and icon)
-3. Essential icon sizes (minimum PWA requirements)
+3. Essential icon sizes (minimum MVP requirements)
 4. Simple ZIP download
 
 ### Phase 2 (Enhancements)
@@ -393,7 +393,7 @@ Generate a text file with ready-to-use HTML tags:
 - 192x192 - Home screen icon
 - 512x512 - Splash screen
 
-### PWA Manifest Sizes
+### MVP Manifest Sizes
 
 - 48x48, 72x72, 96x96, 144x144, 192x192, 256x256, 384x384, 512x512, 1024x1024
 
@@ -404,6 +404,6 @@ Generate a text file with ready-to-use HTML tags:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-08-01  
+**Document Version**: 1.0
+**Last Updated**: 2025-08-01
 **Status**: Ready for Development
