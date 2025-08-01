@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,6 +24,7 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [borderRadius, setBorderRadius] = useState([20]); // 20% default
   const [iconSize, setIconSize] = useState([60]); // 60% default (40% padding total)
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Get all icon names and filter based on search
   const iconNames = Object.keys(icons);
@@ -32,12 +33,37 @@ export default function Home() {
     name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // Validate selected icon exists on component mount
+  // Validate selected icon exists on component mount and scroll to it
   useEffect(() => {
     if (!icons[selectedIcon as keyof typeof icons]) {
       setSelectedIcon('package'); // Fallback to package if atom doesn't exist
     }
-  }, [selectedIcon]);
+
+    // Scroll to selected icon after a brief delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const selectedButton = document.querySelector(
+        `button[title="${selectedIcon}"]`,
+      );
+      if (selectedButton && scrollAreaRef.current) {
+        const scrollContainer = scrollAreaRef.current.querySelector(
+          '[data-radix-scroll-area-viewport]',
+        );
+        if (scrollContainer) {
+          const buttonRect = selectedButton.getBoundingClientRect();
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const relativeTop =
+            buttonRect.top - containerRect.top + scrollContainer.scrollTop;
+
+          // Center the selected icon in the viewport
+          const scrollPosition =
+            relativeTop - containerRect.height / 2 + buttonRect.height / 2;
+          scrollContainer.scrollTop = Math.max(0, scrollPosition);
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []); // Only run on mount
 
   // Ensure the selected icon exists, fallback to 'package' if not found
   const IconComponent =
@@ -133,7 +159,7 @@ export default function Home() {
 
         {/* Icon Grid */}
         <div className="max-h-[330px] flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
+          <ScrollArea ref={scrollAreaRef} className="h-full">
             <div className="grid grid-cols-6 gap-0 p-2">
               {filteredIcons.slice(0, 300).map(iconName => {
                 const Icon = icons[iconName as keyof typeof icons];

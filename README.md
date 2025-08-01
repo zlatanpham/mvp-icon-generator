@@ -1,20 +1,31 @@
-# Next.js Boilerplate
+# PWA Icon Generator
 
-A minimal, clean starter template built with Next.js 15, TypeScript, and Tailwind CSS.
+A modern, intuitive web application for generating Progressive Web Application (PWA) icons with customizable colors, sizes, and styles. Built with Next.js 15, TypeScript, and Tailwind CSS.
+
+![PWA Icon Generator](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=flat-square&logo=tailwind-css)
 
 ## Features
 
-- ⚡ **Next.js 15** with App Router and Turbopack
-- 📝 **TypeScript** for type safety
-- 🎨 **Tailwind CSS v4** for styling
-- 🧩 **shadcn/ui** ready to use
-- 🧪 **Vitest** for testing
-- 📱 **Responsive** design
-- 🎯 **ESLint** configured
-- 💅 **Prettier** for code formatting
-- 🪝 **Husky** + **lint-staged** for pre-commit hooks
+- **Icon Library**: Browse and search through 1000+ icons from Lucide
+- **Real-time Preview**: See your icon changes instantly with multiple size variations
+- **Customization Options**:
+  - Background color with color picker
+  - Icon color with color picker
+  - Border radius adjustment (0-50%)
+  - Icon size control (30-90%)
+- **Complete PWA Package**: Generates all required icon sizes and formats:
+  - Favicons (16x16, 32x32, favicon.ico)
+  - Apple Touch Icon (180x180)
+  - Android Chrome icons (192x192, 512x512)
+  - PWA icons (48x48 to 1024x1024)
+  - Maskable icons for Android
+  - manifest.json file
+  - HTML meta tags
+- **One-click Download**: Get all icons in a convenient ZIP file
 
-## Quick Start
+## Getting Started
 
 ### Prerequisites
 
@@ -26,8 +37,8 @@ A minimal, clean starter template built with Next.js 15, TypeScript, and Tailwin
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/zlatanpham/nextjs-boilerplate.git
-cd nextjs-boilerplate
+git clone https://github.com/zlatanpham/mvp-icon-generator.git
+cd mvp-icon-generator
 ```
 
 2. Install dependencies:
@@ -42,47 +53,68 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the application.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Available Scripts
+## Usage
+
+1. **Select an Icon**: Browse or search for an icon from the library
+2. **Customize**:
+   - Adjust background and icon colors using the color pickers
+   - Set border radius with the slider (0% for square, 50% for circle)
+   - Control icon size relative to the background
+3. **Preview**: See real-time updates in multiple sizes
+4. **Download**: Click "Download" to get a ZIP file with all icon sizes
+
+## Generated Files
+
+The download package includes:
+
+- **Icons**: All standard PWA icon sizes from 16x16 to 1024x1024
+- **favicon.ico**: Multi-resolution favicon
+- **manifest.json**: Pre-configured web app manifest
+- **html-meta-tags.txt**: Ready-to-use HTML meta tags
+- **README.txt**: Installation instructions
+
+## Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) with App Router
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Testing**: [Vitest](https://vitest.dev/)
+
+## Development
+
+### Available Scripts
 
 - `pnpm dev` - Start development server
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
-- `pnpm format` - Format code with Prettier
-- `pnpm format:check` - Check code formatting
 - `pnpm test` - Run tests
-- `pnpm add:ui` - Add shadcn/ui components
+- `pnpm add:ui` - Add new shadcn/ui components
 
-## Project Structure
+### Project Structure
 
 ```
 src/
-├── app/              # Next.js App Router
-│   ├── globals.css   # Global styles
-│   ├── layout.tsx    # Root layout
-│   └── page.tsx      # Home page
+├── app/              # Next.js app router pages
 ├── components/       # React components
 │   └── ui/          # shadcn/ui components
-└── lib/             # Utility functions
-    └── utils.ts     # Helper functions
+├── lib/             # Utility functions
+│   ├── utils.ts     # Helper functions
+│   └── icon-generator.ts  # Icon generation logic
 ```
 
-## Adding UI Components
+## Contributing
 
-This project is configured to use [shadcn/ui](https://ui.shadcn.com/). To add a new component:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-```bash
-pnpm add:ui button
-```
+## Credits
 
-## Deployment
-
-Deploy easily with [Vercel](https://vercel.com):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/nextjs-boilerplate)
+Made with ❤️ by [Zlatan Pham](https://github.com/zlatanpham)
 
 ## License
 
-MIT
+This project is open source and available under the [MIT License](LICENSE).
