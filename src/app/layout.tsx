@@ -5,9 +5,9 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Next.js Boilerplate',
+  title: 'PWA Icon Generator',
   description:
-    'A modern starter template with Next.js, TypeScript, Tailwind CSS, and shadcn/ui',
+    'Create beautiful icons for your Progressive Web Application with customizable colors and sizes',
 };
 
 export default function RootLayout({
