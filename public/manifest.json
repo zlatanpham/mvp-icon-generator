@@ -1,6 +1,6 @@
 {
-  "name": "App Name",
-  "short_name": "App",
+  "name": "MVP Icon Generator",
+  "short_name": "MVP Icon Generator",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

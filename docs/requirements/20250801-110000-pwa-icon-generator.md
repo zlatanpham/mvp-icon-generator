@@ -154,8 +154,8 @@ Generate a `manifest.json` file containing:
 
 ```json
 {
-  "name": "App Name",
-  "short_name": "App",
+  "name": "MVP Icon Generator",
+  "short_name": "MVP Icon Generator",
   "icons": [
     {
       "src": "/icon-48x48.png",

@@ -143,8 +143,8 @@ export function generateManifest(
   themeColor: string,
 ): string {
   const manifest = {
-    name: 'App Name',
-    short_name: 'App',
+    name: 'MVP Icon Generator',
+    short_name: 'MVP Icon Generator',
     icons: [
       ...iconSizes
         .filter(
