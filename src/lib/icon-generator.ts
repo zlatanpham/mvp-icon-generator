@@ -13,7 +13,7 @@ const iconSizes: IconSize[] = [
   { name: 'apple-touch-icon.png', size: 180 },
   { name: 'android-chrome-192x192.png', size: 192 },
   { name: 'android-chrome-512x512.png', size: 512 },
-  
+
   // Additional PWA icons
   { name: 'icon-48x48.png', size: 48 },
   { name: 'icon-72x72.png', size: 72 },
@@ -24,7 +24,7 @@ const iconSizes: IconSize[] = [
   { name: 'icon-384x384.png', size: 384 },
   { name: 'icon-512x512.png', size: 512 },
   { name: 'icon-1024x1024.png', size: 1024 },
-  
+
   // Maskable icons
   { name: 'maskable-icon-192x192.png', size: 192, purpose: 'maskable' },
   { name: 'maskable-icon-512x512.png', size: 512, purpose: 'maskable' },
@@ -35,25 +35,26 @@ export async function generateIcon(
   backgroundColor: string,
   iconColor: string,
   size: number,
-  borderRadius: number = 0.2 // 20% by default
+  borderRadius: number = 0.2, // 20% by default
+  paddingRatio: number = 0.2, // 20% padding by default
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) {
       reject(new Error('Failed to get canvas context'));
       return;
     }
-    
+
     canvas.width = size;
     canvas.height = size;
-    
+
     // Clone the SVG element
     const clonedSvg = svgElement.cloneNode(true) as SVGElement;
     clonedSvg.setAttribute('width', '24');
     clonedSvg.setAttribute('height', '24');
-    
+
     // Lucide icons are stroke-based, so we need to handle them specially
     // Set stroke color and ensure no fill for proper rendering
     clonedSvg.setAttribute('stroke', iconColor);
@@ -61,26 +62,26 @@ export async function generateIcon(
     clonedSvg.setAttribute('stroke-width', '2');
     clonedSvg.setAttribute('stroke-linecap', 'round');
     clonedSvg.setAttribute('stroke-linejoin', 'round');
-    
+
     // Apply the same to all child elements
     const elements = clonedSvg.querySelectorAll('*');
-    elements.forEach((el) => {
+    elements.forEach(el => {
       if (el instanceof SVGElement) {
         // For Lucide icons, we want stroke color and no fill
         el.setAttribute('stroke', iconColor);
         el.setAttribute('fill', 'none');
-        
+
         // Preserve any existing stroke-width
         if (!el.hasAttribute('stroke-width')) {
           el.setAttribute('stroke-width', '2');
         }
       }
     });
-    
+
     // Create SVG data URL
     const svgString = new XMLSerializer().serializeToString(clonedSvg);
     const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
-    
+
     const img = new Image();
     img.onload = () => {
       // Draw rounded rectangle background
@@ -98,17 +99,17 @@ export async function generateIcon(
       ctx.quadraticCurveTo(0, 0, radius, 0);
       ctx.closePath();
       ctx.fill();
-      
-      // Calculate icon size and position (with 20% padding for better visual balance)
-      const padding = size * 0.2;
-      const iconSize = size - (padding * 2);
+
+      // Calculate icon size and position with custom padding
+      const padding = size * paddingRatio;
+      const iconSize = size - padding * 2;
       const x = padding;
       const y = padding;
-      
+
       // Draw the icon
       ctx.drawImage(img, x, y, iconSize, iconSize);
-      
-      canvas.toBlob((blob) => {
+
+      canvas.toBlob(blob => {
         if (blob) {
           resolve(blob);
         } else {
@@ -116,16 +117,18 @@ export async function generateIcon(
         }
       }, 'image/png');
     };
-    
+
     img.onerror = () => {
       reject(new Error('Failed to load SVG'));
     };
-    
+
     img.src = svgDataUrl;
   });
 }
 
-export async function generateIco(pngBlobs: { size: number; blob: Blob }[]): Promise<Blob> {
+export async function generateIco(
+  pngBlobs: { size: number; blob: Blob }[],
+): Promise<Blob> {
   // For now, we'll use the 32x32 PNG as favicon
   // A proper ICO generator would combine multiple sizes
   const favicon = pngBlobs.find(p => p.size === 32);
@@ -135,27 +138,33 @@ export async function generateIco(pngBlobs: { size: number; blob: Blob }[]): Pro
   return pngBlobs[0].blob;
 }
 
-export function generateManifest(backgroundColor: string, themeColor: string): string {
+export function generateManifest(
+  backgroundColor: string,
+  themeColor: string,
+): string {
   const manifest = {
-    name: "App Name",
-    short_name: "App",
+    name: 'App Name',
+    short_name: 'App',
     icons: [
       ...iconSizes
-        .filter(size => !size.name.includes('favicon') && !size.name.includes('apple'))
+        .filter(
+          size =>
+            !size.name.includes('favicon') && !size.name.includes('apple'),
+        )
         .map(({ name, size, purpose }) => ({
           src: `/${name}`,
           sizes: `${size}x${size}`,
-          type: "image/png",
-          ...(purpose && { purpose })
-        }))
+          type: 'image/png',
+          ...(purpose && { purpose }),
+        })),
     ],
     theme_color: themeColor,
     background_color: backgroundColor,
-    display: "standalone",
-    start_url: "/",
-    scope: "/"
+    display: 'standalone',
+    start_url: '/',
+    scope: '/',
   };
-  
+
   return JSON.stringify(manifest, null, 2);
 }
 
@@ -182,30 +191,39 @@ export function generateHtmlMeta(themeColor: string): string {
 export async function generateAllIcons(
   svgElement: SVGElement,
   backgroundColor: string,
-  iconColor: string
+  iconColor: string,
+  borderRadius: number = 0.2,
+  paddingRatio: number = 0.2,
 ): Promise<JSZip> {
   const zip = new JSZip();
   const pngBlobs: { size: number; blob: Blob }[] = [];
-  
+
   // Generate all PNG icons
   for (const { name, size } of iconSizes) {
-    const blob = await generateIcon(svgElement, backgroundColor, iconColor, size);
+    const blob = await generateIcon(
+      svgElement,
+      backgroundColor,
+      iconColor,
+      size,
+      borderRadius,
+      paddingRatio,
+    );
     pngBlobs.push({ size, blob });
     zip.file(name, blob);
   }
-  
+
   // Generate favicon.ico
   const icoBlob = await generateIco(pngBlobs);
   zip.file('favicon.ico', icoBlob);
-  
+
   // Generate manifest.json
   const manifest = generateManifest(backgroundColor, backgroundColor);
   zip.file('manifest.json', manifest);
-  
+
   // Generate HTML meta tags
   const htmlMeta = generateHtmlMeta(backgroundColor);
   zip.file('html-meta-tags.txt', htmlMeta);
-  
+
   // Generate README
   const readme = `# PWA Icons
 
@@ -227,8 +245,8 @@ This package contains all the icons needed for your Progressive Web Application.
 - Maskable Icons: 192x192, 512x512
 
 Generated with PWA Icon Generator`;
-  
+
   zip.file('README.txt', readme);
-  
+
   return zip;
 }
