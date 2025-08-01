@@ -144,7 +144,7 @@ export default function Home() {
                     key={iconName}
                     onClick={() => setSelectedIcon(iconName)}
                     className={cn(
-                      'aspect-square rounded p-1.5 transition-all hover:bg-gray-100',
+                      'aspect-square cursor-pointer rounded !bg-transparent p-1.5 transition-all',
                       isSelected
                         ? 'text-primary ring-primary ring-1'
                         : 'text-gray-600 hover:text-gray-900',
@@ -160,7 +160,7 @@ export default function Home() {
         </div>
 
         {/* Color Controls */}
-        <div className="flex-1 border-t border-gray-200 p-4">
+        <div className="border-t border-b border-gray-200 p-4">
           <h3 className="mb-4 text-sm font-medium text-gray-700">
             Customization
           </h3>
@@ -270,9 +270,11 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className="text-muted-foreground *:[a]:hover:text-primary p-4 text-left text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-          Made with ❤️ by{' '}
-          <a href="https://github.com/zlatanpham">Zlatan Pham</a>
+        <div className="text-muted-foreground *:[a]:hover:text-primary flex flex-1 flex-col justify-end p-4 text-left text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+          <div>
+            Made with ❤️ by{' '}
+            <a href="https://github.com/zlatanpham">Zlatan Pham</a>
+          </div>
         </div>
       </div>
 
