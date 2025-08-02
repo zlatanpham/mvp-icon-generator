@@ -26,43 +26,22 @@ export default function Home() {
   const [iconSize, setIconSize] = useState([60]); // 60% default (40% padding total)
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Get all icon names and filter based on search
-  const iconNames = Object.keys(icons);
+  // Get all icon names and sort with Atom first
+  const iconNames = Object.keys(icons).sort((a, b) => {
+    if (a === 'Atom') return -1;
+    if (b === 'Atom') return 1;
+    return a.localeCompare(b);
+  });
 
   const filteredIcons = iconNames.filter(name =>
     name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // Validate selected icon exists on component mount and scroll to it
+  // Validate selected icon exists
   useEffect(() => {
     if (!icons[selectedIcon as keyof typeof icons]) {
       setSelectedIcon('package'); // Fallback to package if atom doesn't exist
     }
-
-    // Scroll to selected icon after a brief delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      const selectedButton = document.querySelector(
-        `button[title="${selectedIcon}"]`,
-      );
-      if (selectedButton && scrollAreaRef.current) {
-        const scrollContainer = scrollAreaRef.current.querySelector(
-          '[data-radix-scroll-area-viewport]',
-        );
-        if (scrollContainer) {
-          const buttonRect = selectedButton.getBoundingClientRect();
-          const containerRect = scrollContainer.getBoundingClientRect();
-          const relativeTop =
-            buttonRect.top - containerRect.top + scrollContainer.scrollTop;
-
-          // Center the selected icon in the viewport
-          const scrollPosition =
-            relativeTop - containerRect.height / 2 + buttonRect.height / 2;
-          scrollContainer.scrollTop = Math.max(0, scrollPosition);
-        }
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
   }, []); // Only run on mount
 
   // Ensure the selected icon exists, fallback to 'package' if not found
@@ -314,7 +293,11 @@ export default function Home() {
             </h1>
             <p className="text-xs text-gray-500">MVP icon generator</p>
           </div>
-          <Button onClick={handleDownload} disabled={isGenerating}>
+          <Button
+            onClick={handleDownload}
+            className="cursor-pointer"
+            disabled={isGenerating}
+          >
             <Download className="mr-2 h-4 w-4" />
             {isGenerating ? 'Generating...' : 'Download'}
           </Button>
