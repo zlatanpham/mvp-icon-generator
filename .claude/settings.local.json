@@ -13,7 +13,9 @@
       "Bash(cat:*)",
       "Bash(pnpm format:*)",
       "Bash(git commit:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
