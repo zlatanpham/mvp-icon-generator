@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import {
   Popover,
   PopoverContent,
@@ -24,8 +25,9 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [borderRadius, setBorderRadius] = useState([20]); // 20% default
   const [iconSize, setIconSize] = useState([60]); // 60% default (40% padding total)
-  const [appName, setAppName] = useState('MVP Icon Generator');
-  const [appShortName, setAppShortName] = useState('MVP Icon Generator');
+  const [includeManifest, setIncludeManifest] = useState(false);
+  const [appName, setAppName] = useState('');
+  const [appShortName, setAppShortName] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Get all icon names and sort with Atom first
@@ -42,14 +44,14 @@ export default function Home() {
   // Validate selected icon exists
   useEffect(() => {
     if (!icons[selectedIcon as keyof typeof icons]) {
-      setSelectedIcon('package'); // Fallback to package if atom doesn't exist
+      setSelectedIcon('Atom'); // Fallback to Atom if selected icon doesn't exist
     }
-  }, []); // Only run on mount
+  }, [selectedIcon]); // Run when selectedIcon changes
 
-  // Ensure the selected icon exists, fallback to 'package' if not found
+  // Ensure the selected icon exists, fallback to 'Atom' if not found
   const IconComponent =
     icons[selectedIcon as keyof typeof icons] ||
-    icons['package' as keyof typeof icons];
+    icons['Atom' as keyof typeof icons];
 
   const handleDownload = async () => {
     if (!IconComponent) return;
@@ -91,6 +93,7 @@ export default function Home() {
         (100 - iconSize[0]) / 200, // Convert icon size to padding ratio
         appName,
         appShortName,
+        includeManifest,
       );
 
       const blob = await zip.generateAsync({ type: 'blob' });
@@ -280,33 +283,50 @@ export default function Home() {
 
         {/* Manifest Section */}
         <div className="border-t border-b border-gray-200 p-4">
-          <h3 className="mb-4 text-sm font-medium text-gray-700">Manifest</h3>
-
-          {/* App Name */}
-          <div className="mb-4">
-            <label className="mb-2 block text-xs text-gray-600">App Name</label>
-            <Input
-              type="text"
-              value={appName}
-              onChange={e => setAppName(e.target.value)}
-              className="h-8 w-full border-gray-300 bg-white text-xs text-gray-900"
-              placeholder="Enter app name"
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-700">Manifest.json</h3>
+            <Switch
+              checked={includeManifest}
+              onCheckedChange={setIncludeManifest}
             />
           </div>
 
-          {/* App Short Name */}
-          <div>
-            <label className="mb-2 block text-xs text-gray-600">
-              App Short Name
-            </label>
-            <Input
-              type="text"
-              value={appShortName}
-              onChange={e => setAppShortName(e.target.value)}
-              className="h-8 w-full border-gray-300 bg-white text-xs text-gray-900"
-              placeholder="Enter short name"
-            />
-          </div>
+          {includeManifest ? (
+            <>
+              {/* App Name */}
+              <div className="mb-4">
+                <label className="mb-2 block text-xs text-gray-600">
+                  App Name
+                </label>
+                <Input
+                  type="text"
+                  value={appName}
+                  onChange={e => setAppName(e.target.value)}
+                  className="h-8 w-full border-gray-300 bg-white text-xs text-gray-900"
+                  placeholder="Enter name"
+                />
+              </div>
+
+              {/* App Short Name */}
+              <div>
+                <label className="mb-2 block text-xs text-gray-600">
+                  App Short Name
+                </label>
+                <Input
+                  type="text"
+                  value={appShortName}
+                  onChange={e => setAppShortName(e.target.value)}
+                  className="h-8 w-full border-gray-300 bg-white text-xs text-gray-900"
+                  placeholder="Enter short name"
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-xs text-gray-500">
+              Enable to include manifest.json for Progressive Web App (PWA)
+              functionality
+            </p>
+          )}
         </div>
 
         {/* Footer */}
@@ -445,27 +465,42 @@ export default function Home() {
               <li className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
                 <strong className="text-gray-900">All Sizes</strong> included
-                from 16×16 to 1024×1024
+                from 16×16 to {includeManifest ? '1024×1024' : '512×512'}
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
                 <strong className="text-gray-900">Favicon.ico</strong> with
                 multiple resolutions
               </li>
+              {includeManifest && (
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600">✓</span>
+                  <strong className="text-gray-900">
+                    Apple Touch Icon
+                  </strong>{' '}
+                  for iOS devices
+                </li>
+              )}
+              {includeManifest && (
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600">✓</span>
+                  <strong className="text-gray-900">
+                    iOS Safari Splash Screens
+                  </strong>{' '}
+                  for all iPhone and iPad sizes
+                </li>
+              )}
+              {includeManifest && (
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600">✓</span>
+                  <strong className="text-gray-900">Android Icons</strong>{' '}
+                  including maskable versions
+                </li>
+              )}
               <li className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
-                <strong className="text-gray-900">Apple Touch Icon</strong> for
-                iOS devices
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                <strong className="text-gray-900">Android Icons</strong>{' '}
-                including maskable versions
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                <strong className="text-gray-900">manifest.json</strong> ready
-                for MVP
+                <strong className="text-gray-900">manifest.json</strong>{' '}
+                {includeManifest ? 'for PWA' : 'optional for PWA'}
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-green-600">✓</span>
@@ -523,18 +558,20 @@ export default function Home() {
                 <span className="text-green-300">&quot;/favicon.ico&quot;</span>
                 <span className="text-blue-400">&gt;</span>
               </div>
-              <div>
-                <span className="text-blue-400">&lt;link</span>
-                <span className="text-yellow-300"> rel</span>
-                <span className="text-white">=</span>
-                <span className="text-green-300">&quot;manifest&quot;</span>
-                <span className="text-yellow-300"> href</span>
-                <span className="text-white">=</span>
-                <span className="text-green-300">
-                  &quot;/manifest.json&quot;
-                </span>
-                <span className="text-blue-400">&gt;</span>
-              </div>
+              {includeManifest && (
+                <div>
+                  <span className="text-blue-400">&lt;link</span>
+                  <span className="text-yellow-300"> rel</span>
+                  <span className="text-white">=</span>
+                  <span className="text-green-300">&quot;manifest&quot;</span>
+                  <span className="text-yellow-300"> href</span>
+                  <span className="text-white">=</span>
+                  <span className="text-green-300">
+                    &quot;/manifest.json&quot;
+                  </span>
+                  <span className="text-blue-400">&gt;</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
