@@ -141,10 +141,12 @@ export async function generateIco(
 export function generateManifest(
   backgroundColor: string,
   themeColor: string,
+  appName: string = 'MVP Icon Generator',
+  appShortName: string = 'MVP Icon Generator',
 ): string {
   const manifest = {
-    name: 'MVP Icon Generator',
-    short_name: 'MVP Icon Generator',
+    name: appName,
+    short_name: appShortName,
     icons: [
       ...iconSizes
         .filter(
@@ -194,6 +196,8 @@ export async function generateAllIcons(
   iconColor: string,
   borderRadius: number = 0.2,
   paddingRatio: number = 0.2,
+  appName: string = 'MVP Icon Generator',
+  appShortName: string = 'MVP Icon Generator',
 ): Promise<JSZip> {
   const zip = new JSZip();
   const pngBlobs: { size: number; blob: Blob }[] = [];
@@ -217,7 +221,12 @@ export async function generateAllIcons(
   zip.file('favicon.ico', icoBlob);
 
   // Generate manifest.json
-  const manifest = generateManifest(backgroundColor, backgroundColor);
+  const manifest = generateManifest(
+    backgroundColor,
+    backgroundColor,
+    appName,
+    appShortName,
+  );
   zip.file('manifest.json', manifest);
 
   // Generate HTML meta tags

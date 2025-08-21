@@ -24,6 +24,8 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [borderRadius, setBorderRadius] = useState([20]); // 20% default
   const [iconSize, setIconSize] = useState([60]); // 60% default (40% padding total)
+  const [appName, setAppName] = useState('MVP Icon Generator');
+  const [appShortName, setAppShortName] = useState('MVP Icon Generator');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Get all icon names and sort with Atom first
@@ -87,6 +89,8 @@ export default function Home() {
         iconColor,
         borderRadius[0] / 100, // Convert percentage to decimal
         (100 - iconSize[0]) / 200, // Convert icon size to padding ratio
+        appName,
+        appShortName,
       );
 
       const blob = await zip.generateAsync({ type: 'blob' });
@@ -259,7 +263,7 @@ export default function Home() {
           </div>
 
           {/* Icon Size */}
-          <div>
+          <div className="mb-4">
             <label className="mb-2 block text-xs text-gray-600">
               Icon Size: {iconSize[0]}%
             </label>
@@ -270,6 +274,37 @@ export default function Home() {
               min={30}
               step={1}
               className="w-full"
+            />
+          </div>
+        </div>
+
+        {/* Manifest Section */}
+        <div className="border-t border-b border-gray-200 p-4">
+          <h3 className="mb-4 text-sm font-medium text-gray-700">Manifest</h3>
+
+          {/* App Name */}
+          <div className="mb-4">
+            <label className="mb-2 block text-xs text-gray-600">App Name</label>
+            <Input
+              type="text"
+              value={appName}
+              onChange={e => setAppName(e.target.value)}
+              className="h-8 w-full border-gray-300 bg-white text-xs text-gray-900"
+              placeholder="Enter app name"
+            />
+          </div>
+
+          {/* App Short Name */}
+          <div>
+            <label className="mb-2 block text-xs text-gray-600">
+              App Short Name
+            </label>
+            <Input
+              type="text"
+              value={appShortName}
+              onChange={e => setAppShortName(e.target.value)}
+              className="h-8 w-full border-gray-300 bg-white text-xs text-gray-900"
+              placeholder="Enter short name"
             />
           </div>
         </div>
