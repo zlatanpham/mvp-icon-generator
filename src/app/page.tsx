@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Popover,
   PopoverContent,
@@ -16,6 +17,11 @@ import { icons } from 'lucide-react';
 import { Search, Download } from 'lucide-react';
 import { generateAllIcons } from '@/lib/icon-generator';
 import { cn } from '@/lib/utils';
+import SvgUploader from '@/components/upload/svg-uploader';
+import UploadedIconDisplay from '@/components/upload/uploaded-icon-display';
+import IconRenderer from '@/components/icon-renderer';
+import { UploadedSvg, SvgProcessor } from '@/lib/svg-processor';
+import { SvgStorage } from '@/lib/svg-storage';
 
 export default function Home() {
   const [selectedIcon, setSelectedIcon] = useState<string>('Atom');
@@ -30,6 +36,10 @@ export default function Home() {
   const [appShortName, setAppShortName] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // SVG Upload state (single icon only)
+  const [uploadedSvg, setUploadedSvg] = useState<UploadedSvg | null>(null);
+  const [iconMode, setIconMode] = useState<'library' | 'uploaded'>('library');
+
   // Get all icon names and sort with Atom first
   const iconNames = Object.keys(icons).sort((a, b) => {
     if (a === 'Atom') return -1;
@@ -41,48 +51,121 @@ export default function Home() {
     name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  // Load uploaded SVG from storage on component mount
+  useEffect(() => {
+    const stored = SvgStorage.loadUploadedSvgs();
+    if (stored.length > 0) {
+      setUploadedSvg(stored[0]); // Only take the first one
+    }
+  }, []);
+
   // Validate selected icon exists
   useEffect(() => {
-    if (!icons[selectedIcon as keyof typeof icons]) {
+    if (iconMode === 'library' && !icons[selectedIcon as keyof typeof icons]) {
       setSelectedIcon('Atom'); // Fallback to Atom if selected icon doesn't exist
     }
-  }, [selectedIcon]); // Run when selectedIcon changes
+  }, [selectedIcon, iconMode]);
 
-  // Ensure the selected icon exists, fallback to 'Atom' if not found
-  const IconComponent =
-    icons[selectedIcon as keyof typeof icons] ||
-    icons['Atom' as keyof typeof icons];
+  // Handle uploaded SVG success (replace any existing)
+  const handleUploadSuccess = (newUploadedSvg: UploadedSvg) => {
+    setUploadedSvg(newUploadedSvg);
+    SvgStorage.saveUploadedSvgs([newUploadedSvg]); // Save as single item array
+
+    // Auto-select the newly uploaded SVG
+    setIconMode('uploaded');
+  };
+
+  // Handle uploaded SVG error
+  const handleUploadError = (error: string) => {
+    console.error('Upload error:', error);
+  };
+
+  // Handle SVG removal
+  const handleSvgRemove = () => {
+    setUploadedSvg(null);
+    SvgStorage.clearAllUploadedSvgs();
+
+    // Switch to library mode
+    setIconMode('library');
+    setSelectedIcon('Atom');
+  };
+
+  // Handle tab change
+  const handleTabChange = (value: string) => {
+    if (value === 'library') {
+      setIconMode('library');
+    } else if (value === 'uploaded') {
+      setIconMode('uploaded');
+    }
+  };
+
+  // Get current icon (either Lucide or uploaded SVG)
+  const getCurrentIcon = () => {
+    if (iconMode === 'uploaded' && uploadedSvg) {
+      return { type: 'uploaded', data: uploadedSvg };
+    }
+
+    // Fallback to library icon
+    const IconComponent =
+      icons[selectedIcon as keyof typeof icons] ||
+      icons['Atom' as keyof typeof icons];
+    return { type: 'library', data: IconComponent };
+  };
+
+  const currentIcon = getCurrentIcon();
 
   const handleDownload = async () => {
-    if (!IconComponent) return;
-
     setIsGenerating(true);
     try {
-      const container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      document.body.appendChild(container);
+      let svgElement: SVGElement;
+      let downloadName: string;
 
-      const iconElement = document.createElement('div');
-      container.appendChild(iconElement);
+      if (currentIcon.type === 'uploaded') {
+        // Handle uploaded SVG
+        const uploadedSvg = currentIcon.data as UploadedSvg;
+        svgElement = SvgProcessor.getSvgElement(uploadedSvg);
+        downloadName = `mvp-icons-${uploadedSvg.name}`;
+      } else if (currentIcon.type === 'library') {
+        // Handle Lucide icon
+        const LucideIcon = currentIcon.data as React.ComponentType<{
+          width?: number;
+          height?: number;
+          onLoad?: () => void;
+        }>;
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        document.body.appendChild(container);
 
-      const { createRoot } = await import('react-dom/client');
-      const root = createRoot(iconElement);
+        const iconElement = document.createElement('div');
+        container.appendChild(iconElement);
 
-      await new Promise<void>(resolve => {
-        root.render(
-          <IconComponent width={24} height={24} onLoad={() => resolve()} />,
-        );
-        setTimeout(resolve, 100);
-      });
+        const { createRoot } = await import('react-dom/client');
+        const root = createRoot(iconElement);
 
-      const svgElement = iconElement.querySelector('svg');
-      if (!svgElement) {
-        throw new Error('Failed to find SVG element');
-      }
+        await new Promise<void>(resolve => {
+          root.render(
+            <LucideIcon width={24} height={24} onLoad={() => resolve()} />,
+          );
+          setTimeout(resolve, 100);
+        });
 
-      if (!svgElement.getAttribute('viewBox')) {
-        svgElement.setAttribute('viewBox', '0 0 24 24');
+        const foundSvg = iconElement.querySelector('svg');
+        if (!foundSvg) {
+          throw new Error('Failed to find SVG element');
+        }
+
+        if (!foundSvg.getAttribute('viewBox')) {
+          foundSvg.setAttribute('viewBox', '0 0 24 24');
+        }
+
+        svgElement = foundSvg;
+        downloadName = `mvp-icons-${selectedIcon}`;
+
+        root.unmount();
+        document.body.removeChild(container);
+      } else {
+        throw new Error('No icon selected');
       }
 
       const zip = await generateAllIcons(
@@ -94,6 +177,7 @@ export default function Home() {
         appName,
         appShortName,
         includeManifest,
+        currentIcon.type === 'library', // true for Lucide icons, false for uploaded SVGs
       );
 
       const blob = await zip.generateAsync({ type: 'blob' });
@@ -101,14 +185,11 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `mvp-icons-${selectedIcon}.zip`;
+      a.download = `${downloadName}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      root.unmount();
-      document.body.removeChild(container);
     } catch (error) {
       console.error('Failed to generate icons:', error);
       alert('Failed to generate icons. Please try again.');
@@ -123,6 +204,14 @@ export default function Home() {
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  };
+
+  // Get display name for current icon
+  const getCurrentIconName = () => {
+    if (currentIcon.type === 'uploaded') {
+      return (currentIcon.data as UploadedSvg).name;
+    }
+    return formatIconName(selectedIcon);
   };
 
   return (
@@ -143,32 +232,83 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Icon Grid */}
-        <div className="max-h-[330px] flex-1 overflow-hidden">
-          <ScrollArea ref={scrollAreaRef} className="h-full">
-            <div className="grid grid-cols-6 gap-0 p-2">
-              {filteredIcons.slice(0, 300).map(iconName => {
-                const Icon = icons[iconName as keyof typeof icons];
-                const isSelected = selectedIcon === iconName;
+        {/* Icon Selection Tabs */}
+        <div className="flex flex-col">
+          <Tabs
+            value={iconMode}
+            onValueChange={handleTabChange}
+            className="flex h-full flex-col"
+          >
+            <TabsList className="mx-2 mt-2 mb-0 grid w-auto grid-cols-2">
+              <TabsTrigger value="library" className="text-xs">
+                Library
+              </TabsTrigger>
+              <TabsTrigger value="uploaded" className="text-xs">
+                <span className="flex items-center gap-1">
+                  Custom
+                  {uploadedSvg && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                  )}
+                </span>
+              </TabsTrigger>
+            </TabsList>
 
-                return Icon ? (
-                  <button
-                    key={iconName}
-                    onClick={() => setSelectedIcon(iconName)}
-                    className={cn(
-                      'aspect-square cursor-pointer rounded !bg-transparent p-1.5 transition-all',
-                      isSelected
-                        ? 'text-primary ring-primary ring-1'
-                        : 'text-gray-600 hover:text-gray-900',
-                    )}
-                    title={iconName}
-                  >
-                    <Icon className="mx-auto h-4 w-4" />
-                  </button>
-                ) : null;
-              })}
-            </div>
-          </ScrollArea>
+            <TabsContent
+              value="library"
+              className="mt-0 flex h-[330px] flex-col"
+            >
+              {/* Library Icon Grid */}
+              <div className="flex-1 overflow-hidden">
+                <ScrollArea ref={scrollAreaRef} className="h-full">
+                  <div className="grid grid-cols-6 gap-0 p-2">
+                    {filteredIcons.slice(0, 300).map(iconName => {
+                      const Icon = icons[iconName as keyof typeof icons];
+                      const isSelected =
+                        iconMode === 'library' && selectedIcon === iconName;
+
+                      return Icon ? (
+                        <button
+                          key={iconName}
+                          onClick={() => {
+                            setSelectedIcon(iconName);
+                            setIconMode('library');
+                          }}
+                          className={cn(
+                            'aspect-square cursor-pointer rounded !bg-transparent p-1.5 transition-all',
+                            isSelected
+                              ? 'text-primary ring-primary ring-1'
+                              : 'text-gray-600 hover:text-gray-900',
+                          )}
+                          title={iconName}
+                        >
+                          <Icon className="mx-auto h-4 w-4" />
+                        </button>
+                      ) : null;
+                    })}
+                  </div>
+                </ScrollArea>
+              </div>
+            </TabsContent>
+
+            <TabsContent
+              value="uploaded"
+              className="mt-0 flex h-[330px] flex-col"
+            >
+              {uploadedSvg ? (
+                /* Show uploaded icon when one exists */
+                <UploadedIconDisplay
+                  uploadedSvg={uploadedSvg}
+                  onRemoveSvg={handleSvgRemove}
+                />
+              ) : (
+                /* Show upload area when no icon is uploaded */
+                <SvgUploader
+                  onUploadSuccess={handleUploadSuccess}
+                  onUploadError={handleUploadError}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Color Controls */}
@@ -344,7 +484,7 @@ export default function Home() {
         <div className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6">
           <div>
             <h1 className="text-base font-normal text-gray-700">
-              {formatIconName(selectedIcon)} Icon
+              {getCurrentIconName()} Icon
             </h1>
             <p className="text-xs text-gray-500">MVP icon generator</p>
           </div>
@@ -370,15 +510,27 @@ export default function Home() {
                   borderRadius: `${borderRadius[0]}%`,
                 }}
               >
-                {IconComponent && (
-                  <IconComponent
-                    style={{
-                      color: iconColor,
-                      width: `${iconSize[0]}%`,
-                      height: `${iconSize[0]}%`,
-                    }}
-                  />
-                )}
+                <IconRenderer
+                  iconType={currentIcon.type as 'library' | 'uploaded'}
+                  libraryIcon={
+                    currentIcon.type === 'library'
+                      ? (currentIcon.data as React.ComponentType<{
+                          style?: React.CSSProperties;
+                          className?: string;
+                        }>)
+                      : undefined
+                  }
+                  uploadedSvg={
+                    currentIcon.type === 'uploaded'
+                      ? (currentIcon.data as UploadedSvg)
+                      : undefined
+                  }
+                  style={{
+                    color: iconColor,
+                    width: `${iconSize[0]}%`,
+                    height: `${iconSize[0]}%`,
+                  }}
+                />
               </div>
             </div>
 
@@ -440,16 +592,28 @@ export default function Home() {
                         borderRadius: `${borderRadius[0]}%`,
                       }}
                     >
-                      {IconComponent && (
-                        <IconComponent
-                          className={preview.iconSize}
-                          style={{
-                            color: iconColor,
-                            width: `${iconSize[0]}%`,
-                            height: `${iconSize[0]}%`,
-                          }}
-                        />
-                      )}
+                      <IconRenderer
+                        iconType={currentIcon.type as 'library' | 'uploaded'}
+                        libraryIcon={
+                          currentIcon.type === 'library'
+                            ? (currentIcon.data as React.ComponentType<{
+                                style?: React.CSSProperties;
+                                className?: string;
+                              }>)
+                            : undefined
+                        }
+                        uploadedSvg={
+                          currentIcon.type === 'uploaded'
+                            ? (currentIcon.data as UploadedSvg)
+                            : undefined
+                        }
+                        className={preview.iconSize}
+                        style={{
+                          color: iconColor,
+                          width: `${iconSize[0]}%`,
+                          height: `${iconSize[0]}%`,
+                        }}
+                      />
                     </div>
                     <code className="text-xs text-gray-500">
                       {preview.label}

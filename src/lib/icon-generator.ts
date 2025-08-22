@@ -83,6 +83,7 @@ export async function generateIcon(
   size: number,
   borderRadius: number = 0.2, // 20% by default
   paddingRatio: number = 0.2, // 20% padding by default
+  isLucideIcon: boolean = true, // true for Lucide icons, false for uploaded SVGs
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
@@ -101,28 +102,60 @@ export async function generateIcon(
     clonedSvg.setAttribute('width', '24');
     clonedSvg.setAttribute('height', '24');
 
-    // Lucide icons are stroke-based, so we need to handle them specially
-    // Set stroke color and ensure no fill for proper rendering
-    clonedSvg.setAttribute('stroke', iconColor);
-    clonedSvg.setAttribute('fill', 'none');
-    clonedSvg.setAttribute('stroke-width', '2');
-    clonedSvg.setAttribute('stroke-linecap', 'round');
-    clonedSvg.setAttribute('stroke-linejoin', 'round');
+    if (isLucideIcon) {
+      // Lucide icons are stroke-based, so we need to handle them specially
+      // Set stroke color and ensure no fill for proper rendering
+      clonedSvg.setAttribute('stroke', iconColor);
+      clonedSvg.setAttribute('fill', 'none');
+      clonedSvg.setAttribute('stroke-width', '2');
+      clonedSvg.setAttribute('stroke-linecap', 'round');
+      clonedSvg.setAttribute('stroke-linejoin', 'round');
 
-    // Apply the same to all child elements
-    const elements = clonedSvg.querySelectorAll('*');
-    elements.forEach(el => {
-      if (el instanceof SVGElement) {
-        // For Lucide icons, we want stroke color and no fill
-        el.setAttribute('stroke', iconColor);
-        el.setAttribute('fill', 'none');
+      // Apply the same to all child elements
+      const elements = clonedSvg.querySelectorAll('*');
+      elements.forEach(el => {
+        if (el instanceof SVGElement) {
+          // For Lucide icons, we want stroke color and no fill
+          el.setAttribute('stroke', iconColor);
+          el.setAttribute('fill', 'none');
 
-        // Preserve any existing stroke-width
-        if (!el.hasAttribute('stroke-width')) {
-          el.setAttribute('stroke-width', '2');
+          // Preserve any existing stroke-width
+          if (!el.hasAttribute('stroke-width')) {
+            el.setAttribute('stroke-width', '2');
+          }
         }
-      }
-    });
+      });
+    } else {
+      // For uploaded SVGs, apply color transformation using DOM manipulation for reliability
+
+      // Process all elements that should have fill colors
+      const elementsToColor = clonedSvg.querySelectorAll(
+        'path, circle, ellipse, rect, polygon, polyline',
+      );
+      elementsToColor.forEach(element => {
+        const fill = element.getAttribute('fill');
+        const stroke = element.getAttribute('stroke');
+
+        // If element has fill and it's not 'none', replace with iconColor
+        if (fill && fill !== 'none') {
+          element.setAttribute('fill', iconColor);
+        }
+        // If element has stroke and it's not 'none', replace with iconColor
+        if (stroke && stroke !== 'none') {
+          element.setAttribute('stroke', iconColor);
+        }
+        // If element has no fill or stroke, add fill with iconColor
+        if (!fill && !stroke) {
+          element.setAttribute('fill', iconColor);
+        }
+      });
+
+      // Debug: log the transformed SVG
+      console.log(
+        'Transformed SVG for canvas:',
+        new XMLSerializer().serializeToString(clonedSvg),
+      );
+    }
 
     // Create SVG data URL
     const svgString = new XMLSerializer().serializeToString(clonedSvg);
@@ -180,6 +213,7 @@ export async function generateSplashScreen(
   height: number,
   borderRadius: number = 0.2,
   paddingRatio: number = 0.2,
+  isLucideIcon: boolean = true, // true for Lucide icons, false for uploaded SVGs
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
@@ -198,24 +232,56 @@ export async function generateSplashScreen(
     clonedSvg.setAttribute('width', '24');
     clonedSvg.setAttribute('height', '24');
 
-    // Lucide icons are stroke-based, so we need to handle them specially
-    clonedSvg.setAttribute('stroke', iconColor);
-    clonedSvg.setAttribute('fill', 'none');
-    clonedSvg.setAttribute('stroke-width', '2');
-    clonedSvg.setAttribute('stroke-linecap', 'round');
-    clonedSvg.setAttribute('stroke-linejoin', 'round');
+    if (isLucideIcon) {
+      // Lucide icons are stroke-based, so we need to handle them specially
+      clonedSvg.setAttribute('stroke', iconColor);
+      clonedSvg.setAttribute('fill', 'none');
+      clonedSvg.setAttribute('stroke-width', '2');
+      clonedSvg.setAttribute('stroke-linecap', 'round');
+      clonedSvg.setAttribute('stroke-linejoin', 'round');
 
-    // Apply the same to all child elements
-    const elements = clonedSvg.querySelectorAll('*');
-    elements.forEach(el => {
-      if (el instanceof SVGElement) {
-        el.setAttribute('stroke', iconColor);
-        el.setAttribute('fill', 'none');
-        if (!el.hasAttribute('stroke-width')) {
-          el.setAttribute('stroke-width', '2');
+      // Apply the same to all child elements
+      const elements = clonedSvg.querySelectorAll('*');
+      elements.forEach(el => {
+        if (el instanceof SVGElement) {
+          el.setAttribute('stroke', iconColor);
+          el.setAttribute('fill', 'none');
+          if (!el.hasAttribute('stroke-width')) {
+            el.setAttribute('stroke-width', '2');
+          }
         }
-      }
-    });
+      });
+    } else {
+      // For uploaded SVGs, apply color transformation using DOM manipulation for reliability
+
+      // Process all elements that should have fill colors
+      const elementsToColor = clonedSvg.querySelectorAll(
+        'path, circle, ellipse, rect, polygon, polyline',
+      );
+      elementsToColor.forEach(element => {
+        const fill = element.getAttribute('fill');
+        const stroke = element.getAttribute('stroke');
+
+        // If element has fill and it's not 'none', replace with iconColor
+        if (fill && fill !== 'none') {
+          element.setAttribute('fill', iconColor);
+        }
+        // If element has stroke and it's not 'none', replace with iconColor
+        if (stroke && stroke !== 'none') {
+          element.setAttribute('stroke', iconColor);
+        }
+        // If element has no fill or stroke, add fill with iconColor
+        if (!fill && !stroke) {
+          element.setAttribute('fill', iconColor);
+        }
+      });
+
+      // Debug: log the transformed SVG
+      console.log(
+        'Transformed SVG for canvas:',
+        new XMLSerializer().serializeToString(clonedSvg),
+      );
+    }
 
     // Create SVG data URL
     const svgString = new XMLSerializer().serializeToString(clonedSvg);
@@ -427,6 +493,7 @@ export async function generateAllIcons(
   appName: string = 'MVP Icon Generator',
   appShortName: string = 'MVP Icon Generator',
   includeManifest: boolean = false,
+  isLucideIcon: boolean = true, // true for Lucide icons, false for uploaded SVGs
 ): Promise<JSZip> {
   const zip = new JSZip();
   const pngBlobs: { size: number; blob: Blob }[] = [];
@@ -443,6 +510,7 @@ export async function generateAllIcons(
       size,
       borderRadius,
       paddingRatio,
+      isLucideIcon,
     );
     pngBlobs.push({ size, blob });
     zip.file(name, blob);
@@ -459,6 +527,7 @@ export async function generateAllIcons(
         height,
         borderRadius,
         paddingRatio,
+        isLucideIcon,
       );
       zip.file(name, blob);
     }
