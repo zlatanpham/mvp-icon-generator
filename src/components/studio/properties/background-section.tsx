@@ -4,7 +4,6 @@ import { useDesign, type BgType } from '@/lib/studio/design';
 import { BG_TYPES } from '@/lib/studio/data/bg-types';
 import { SWATCHES } from '@/lib/studio/data/swatches';
 import { GRADIENTS } from '@/lib/studio/data/gradients';
-import { backgroundCss } from '@/lib/studio/render/background-css';
 import { patternDataUrl } from '@/lib/studio/render/pattern-svg';
 
 export function BackgroundSection() {
@@ -37,15 +36,14 @@ export function BackgroundSection() {
 
   return (
     <>
-      <div className="mb-3.5 grid grid-cols-4 border border-[var(--color-rule)]">
-        {BG_TYPES.map((t, i) => (
+      <div className="mb-4 grid grid-cols-4 gap-2">
+        {BG_TYPES.map((t) => (
           <BgTypeButton
             key={t.id}
             id={t.id}
             label={t.label}
             active={isActive(t.id)}
             onClick={() => onTypeClick(t.id)}
-            isLastRow={i >= 4}
           />
         ))}
       </div>
@@ -74,13 +72,11 @@ function BgTypeButton({
   label,
   active,
   onClick,
-  isLastRow,
 }: {
   id: BgType;
   label: string;
   active: boolean;
   onClick: () => void;
-  isLastRow: boolean;
 }) {
   let swatchStyle: React.CSSProperties = {};
   switch (id) {
@@ -122,19 +118,20 @@ function BgTypeButton({
       type="button"
       onClick={onClick}
       title={label}
-      className={`relative grid aspect-square cursor-pointer place-items-center overflow-hidden border-r border-b border-[var(--color-rule)] [&:nth-child(4n)]:border-r-0 ${
-        isLastRow ? 'border-b-0' : ''
-      } ${active ? 'bg-[var(--color-ink)]' : 'bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)]'}`}
+      className={`group relative flex aspect-square cursor-pointer flex-col items-center justify-between rounded-lg border p-1.5 transition-all ${
+        active
+          ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] ring-2 ring-[var(--color-accent)]'
+          : 'border-[var(--color-line)] bg-[var(--color-paper-2)] hover:border-[var(--color-ink-4)] hover:shadow-soft'
+      }`}
     >
       <div
-        className="h-1/2 w-3/5 overflow-hidden"
+        className="h-7 w-7 rounded-md"
         style={swatchStyle}
       />
       <div
-        className="absolute right-0 bottom-1 left-0 text-center font-mono text-[8px] font-medium tracking-[0.12em] uppercase"
-        style={{
-          color: active ? 'var(--color-paper)' : 'var(--color-ink-3)',
-        }}
+        className={`text-[9.5px] font-semibold ${
+          active ? 'text-[var(--color-accent-2)]' : 'text-[var(--color-ink-3)]'
+        }`}
       >
         {label}
       </div>
@@ -152,7 +149,7 @@ function SolidControls({
   return (
     <>
       <ColorRow value={value} onChange={onChange} />
-      <div className="mt-2.5 mb-1.5 font-serif text-[13px] font-bold tracking-[-0.01em]">
+      <div className="mt-3 mb-2 text-[12px] font-semibold text-[var(--color-ink-3)]">
         Swatches
       </div>
       <SwatchGrid current={value} onPick={onChange} />
@@ -168,20 +165,23 @@ export function ColorRow({
   onChange: (c: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-2.5 border border-[var(--color-rule)] bg-transparent p-2 px-2.5 focus-within:border-[var(--color-ink)]">
+    <div className="flex items-center gap-2 rounded-md border border-[var(--color-line)] bg-[var(--color-paper-2)] p-2 transition-colors focus-within:border-[var(--color-accent)] focus-within:bg-white">
       <div
-        className="h-[26px] w-[26px] flex-shrink-0 border border-[var(--color-ink)]"
-        style={{ background: value }}
+        className="h-6 w-6 flex-shrink-0 rounded-md"
+        style={{
+          background: value,
+          boxShadow: 'inset 0 0 0 1px rgba(14,19,24,.1)',
+        }}
       />
       <input
-        className="flex-1 bg-transparent font-mono text-[12px] tracking-[0.06em] text-[var(--color-ink)] uppercase outline-none"
+        className="flex-1 bg-transparent font-mono text-[12px] tracking-[0.04em] text-[var(--color-ink)] uppercase outline-none"
         value={value.replace('#', '').toUpperCase()}
         onChange={(e) => {
           const v = e.target.value.replace('#', '');
           onChange('#' + v);
         }}
       />
-      <span className="border-l border-[var(--color-rule)] pl-2.5 font-mono text-[11px] text-[var(--color-ink-3)]">
+      <span className="border-l border-[var(--color-line)] pl-2 font-mono text-[11px] text-[var(--color-ink-3)]">
         100%
       </span>
     </div>
@@ -196,8 +196,8 @@ export function SwatchGrid({
   onPick: (c: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-8 border border-[var(--color-rule)]">
-      {SWATCHES.map((c, i) => {
+    <div className="grid grid-cols-8 gap-1.5">
+      {SWATCHES.map((c) => {
         const active = current.toUpperCase() === c.toUpperCase();
         return (
           <button
@@ -206,11 +206,11 @@ export function SwatchGrid({
             onClick={() => onPick(c)}
             title={c}
             style={{ background: c }}
-            className={`relative aspect-square cursor-pointer border-r border-[var(--color-rule)] transition-transform [&:nth-child(8n)]:border-r-0 hover:z-[2] hover:scale-110 hover:shadow-[0_4px_12px_rgba(0,0,0,0.20)] ${
+            className={`aspect-square cursor-pointer rounded-md transition-transform hover:scale-110 ${
               active
-                ? 'z-[1] [box-shadow:inset_0_0_0_2px_var(--color-ink),inset_0_0_0_4px_var(--color-paper)]'
-                : ''
-            } ${i >= SWATCHES.length - 8 ? '' : 'border-b border-[var(--color-rule)]'}`}
+                ? 'ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-paper)]'
+                : 'shadow-[inset_0_0_0_1px_rgba(14,19,24,.08)]'
+            }`}
           />
         );
       })}
@@ -231,13 +231,13 @@ function GradientControls({
 }) {
   return (
     <>
-      <div className="mb-3 flex items-center gap-2.5">
+      <div className="mb-4 flex items-center gap-3">
         {type === 'linear' && (
           <button
             type="button"
             onClick={() => onChange({ angle: (angle + 45) % 360 })}
             title="Rotate angle by 45°"
-            className="relative h-14 w-14 flex-shrink-0 cursor-pointer rounded-full border border-[var(--color-ink)]"
+            className="relative h-12 w-12 flex-shrink-0 cursor-pointer rounded-full border border-[var(--color-line)] bg-[var(--color-paper-2)] transition-colors hover:border-[var(--color-accent)]"
           >
             <span className="absolute top-1/2 left-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-ink)]" />
             <span
@@ -247,7 +247,7 @@ function GradientControls({
           </button>
         )}
         <div className="flex-1">
-          <div className="mb-1 font-mono text-[10px] font-medium tracking-[0.10em] text-[var(--color-ink-3)] uppercase">
+          <div className="mb-1.5 text-[11px] font-semibold text-[var(--color-ink-3)]">
             {type === 'linear'
               ? `Angle · ${angle}°`
               : type === 'mesh'
@@ -257,18 +257,21 @@ function GradientControls({
                   : 'Radial'}
           </div>
           <div
-            className="relative mt-1 h-[22px] overflow-visible border border-[var(--color-ink)]"
+            className="relative h-7 overflow-visible rounded-md"
             style={{
               background: `linear-gradient(90deg, ${colors.join(', ')})`,
+              boxShadow: 'inset 0 0 0 1px rgba(14,19,24,.08)',
             }}
           >
             {colors.map((c, i) => (
               <div
                 key={i}
-                className="absolute top-full mt-1.5 h-2.5 w-2.5 -translate-x-1/2 rotate-45 cursor-pointer border border-[var(--color-ink)]"
+                className="absolute top-full mt-1.5 h-3 w-3 -translate-x-1/2 rounded-full ring-2 ring-white"
                 style={{
                   left: `${(i / Math.max(1, colors.length - 1)) * 100}%`,
                   background: c,
+                  boxShadow:
+                    '0 0 0 1px rgba(14,19,24,.15), 0 2px 4px rgba(14,19,24,.1)',
                 }}
               />
             ))}
@@ -276,10 +279,10 @@ function GradientControls({
         </div>
       </div>
 
-      <div className="mt-7 mb-2 font-serif text-[13px] font-bold tracking-[-0.01em]">
+      <div className="mt-7 mb-2 text-[12px] font-semibold text-[var(--color-ink-3)]">
         Gradient palettes
       </div>
-      <div className="flex flex-col border border-[var(--color-rule)]">
+      <div className="flex flex-col gap-1">
         {GRADIENTS.map((g) => {
           const active = JSON.stringify(g.colors) === JSON.stringify(colors);
           return (
@@ -287,13 +290,13 @@ function GradientControls({
               key={g.id}
               type="button"
               onClick={() => onChange({ colors: g.colors, angle: g.angle })}
-              className={`flex w-full cursor-pointer items-center gap-3 border-b border-[var(--color-rule)] px-3 py-2.5 text-left transition-colors last:border-b-0 ${
+              className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors ${
                 active
-                  ? 'bg-[var(--color-ink)]'
-                  : 'hover:bg-[var(--color-paper-2)]'
+                  ? 'bg-[var(--color-accent-soft)] ring-1 ring-[var(--color-accent)]'
+                  : 'hover:bg-[var(--color-paper-3)]'
               }`}
             >
-              <div className="flex h-6 flex-1 overflow-hidden">
+              <div className="flex h-5 flex-1 overflow-hidden rounded-md">
                 {g.colors.map((c, i) => (
                   <span
                     key={i}
@@ -303,10 +306,9 @@ function GradientControls({
                 ))}
               </div>
               <div
-                className="min-w-[80px] font-serif text-[13px] font-medium tracking-[-0.01em] italic"
-                style={{
-                  color: active ? 'var(--color-paper)' : 'var(--color-ink)',
-                }}
+                className={`min-w-[80px] text-[13px] font-semibold ${
+                  active ? 'text-[var(--color-accent-2)]' : 'text-[var(--color-ink)]'
+                }`}
               >
                 {g.name}
               </div>
@@ -314,28 +316,6 @@ function GradientControls({
           );
         })}
       </div>
-
-      <div className="mt-3 text-center font-mono text-[9px] tracking-[0.14em] text-[var(--color-ink-3)] uppercase">
-        Click the angle pad to rotate · pick a palette below
-      </div>
-
-      {/* fallback: switch back to solid */}
-      <SolidShortcut />
     </>
-  );
-}
-
-function SolidShortcut() {
-  // Helper to keep solid color editable even while in a gradient bg type:
-  // gradients reuse design.bg.gradient.colors, but the user might want to swap
-  // into solid quickly. We expose a small swatch row tied to bg.color here.
-  const { design, patchBg } = useDesign();
-  return (
-    <div className="mt-4">
-      <div className="mb-1.5 font-mono text-[10px] font-medium tracking-[0.10em] text-[var(--color-ink-3)] uppercase">
-        Base color (also used by Pattern)
-      </div>
-      <SwatchGrid current={design.bg.color} onPick={(c) => patchBg({ color: c })} />
-    </div>
   );
 }

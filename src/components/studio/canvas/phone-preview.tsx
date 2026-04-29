@@ -19,17 +19,16 @@ const APPS = [
 
 export function PhonePreview() {
   const { design } = useDesign();
-  // Phone tile is 38px; mockup uses radius * 0.45 to scale 0–50% → 0–22.5px
   const tileRadiusPct = design.radius * 0.45;
   return (
-    <div className="mx-auto mt-9 max-w-[760px]">
-      <div className="border border-[var(--color-line)] bg-[var(--color-paper)] p-[22px_24px]">
-        <div className="mb-[18px] flex items-baseline justify-between border-b border-[var(--color-rule)] pb-3">
-          <div className="inline-flex items-baseline gap-3 font-serif text-[22px] font-bold tracking-[-0.02em] text-[var(--color-ink)]">
-            On a phone home screen
-            <span className="border border-[var(--color-rule)] px-2 py-0.5 font-mono text-[9.5px] font-medium tracking-[0.14em] text-[var(--color-ink-3)] uppercase">
-              iOS
-            </span>
+    <div className="mx-auto mt-10 max-w-[760px]">
+      <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] p-6 shadow-soft">
+        <div className="mb-5 flex items-baseline justify-between">
+          <div className="inline-flex items-baseline gap-2">
+            <h3 className="text-[16px] font-bold text-[var(--color-ink)]">
+              On a phone home screen
+            </h3>
+            <Badge>iOS</Badge>
           </div>
         </div>
 
@@ -41,7 +40,7 @@ export function PhonePreview() {
             background: 'linear-gradient(160deg, #2A2A30, #1A1A1F)',
             borderRadius: 38,
             boxShadow:
-              '0 20px 50px rgba(21,20,15,0.22), inset 0 0 0 1px rgba(255,255,255,0.05)',
+              '0 20px 50px rgba(14,19,24,0.18), inset 0 0 0 1px rgba(255,255,255,0.05)',
           }}
         >
           <div
@@ -64,10 +63,7 @@ export function PhonePreview() {
                 label={design.name}
               />
               {APPS.slice(0, 11).map((a) => (
-                <div
-                  key={a}
-                  className="flex flex-col items-center gap-1"
-                >
+                <div key={a} className="flex flex-col items-center gap-1">
                   <div
                     className="h-[38px] w-[38px] border border-white/10 backdrop-blur"
                     style={{
@@ -151,5 +147,13 @@ function PhoneDockTile({
       strokeWidth={1.8}
       noShadow
     />
+  );
+}
+
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full bg-[var(--color-paper-3)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-ink-3)]">
+      {children}
+    </span>
   );
 }

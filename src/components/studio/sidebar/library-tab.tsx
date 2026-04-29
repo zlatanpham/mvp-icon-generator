@@ -60,20 +60,20 @@ export function LibraryTab() {
 
   return (
     <>
-      <div className="px-[22px] pt-[18px]">
-        <div className="flex h-[38px] items-center gap-2 border border-[var(--color-rule)] px-3.5 focus-within:border-[var(--color-ink)]">
-          <Search className="h-3.5 w-3.5 text-[var(--color-ink-3)]" />
+      <div className="px-4 pt-4">
+        <div className="flex h-9 items-center gap-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-paper-2)] px-3 transition-colors focus-within:border-[var(--color-accent)] focus-within:bg-white">
+          <Search className="h-4 w-4 text-[var(--color-ink-4)]" />
           <input
             placeholder="Search icons"
-            className="flex-1 bg-transparent text-[12px] tracking-[0.02em] outline-none placeholder:text-[var(--color-ink-3)] placeholder:italic"
+            className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--color-ink-4)]"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
       </div>
 
-      <SectionTitle index={1}>Curated</SectionTitle>
-      <div className="editorial-scroll mx-1 grid grid-cols-5 border-t border-[var(--color-rule)]">
+      <SectionTitle>Curated</SectionTitle>
+      <div className="grid grid-cols-5 gap-1 px-3">
         {filteredCurated.map((ico) => (
           <button
             key={ico.id}
@@ -88,10 +88,10 @@ export function LibraryTab() {
                 iconPath: ico.svg,
               })
             }
-            className={`grid aspect-square cursor-pointer place-items-center border-r border-b border-[var(--color-rule)] transition-colors [&:nth-child(5n)]:border-r-0 ${
+            className={`grid aspect-square cursor-pointer place-items-center rounded-md transition-colors ${
               isActiveCurated(ico.id)
-                ? 'bg-[var(--color-ink)] text-[var(--color-paper)]'
-                : 'text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-ink)]'
+                ? 'bg-[var(--color-accent)] text-white'
+                : 'text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]'
             }`}
           >
             <svg
@@ -109,8 +109,8 @@ export function LibraryTab() {
         ))}
       </div>
 
-      <SectionTitle index={2}>Lucide library</SectionTitle>
-      <div className="editorial-scroll mx-1 grid max-h-[40vh] grid-cols-5 overflow-y-auto border-t border-[var(--color-rule)]">
+      <SectionTitle>All icons</SectionTitle>
+      <div className="grid grid-cols-5 gap-1 px-3 pb-4">
         {lucideNames.map((name) => {
           const Icon = icons?.[name];
           if (!Icon) return null;
@@ -129,10 +129,10 @@ export function LibraryTab() {
                   iconPath: undefined,
                 })
               }
-              className={`grid aspect-square cursor-pointer place-items-center border-r border-b border-[var(--color-rule)] transition-colors [&:nth-child(5n)]:border-r-0 ${
+              className={`grid aspect-square cursor-pointer place-items-center rounded-md transition-colors ${
                 active
-                  ? 'bg-[var(--color-ink)] text-[var(--color-paper)]'
-                  : 'text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-ink)]'
+                  ? 'bg-[var(--color-accent)] text-white'
+                  : 'text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]'
               }`}
             >
               <Icon className="h-[18px] w-[18px]" strokeWidth={1.6} />
@@ -140,7 +140,7 @@ export function LibraryTab() {
           );
         })}
         {!icons && (
-          <div className="col-span-5 p-6 text-center font-mono text-[10px] tracking-[0.12em] text-[var(--color-ink-3)] uppercase">
+          <div className="col-span-5 py-6 text-center text-[12px] text-[var(--color-ink-3)]">
             Loading library…
           </div>
         )}
@@ -149,21 +149,10 @@ export function LibraryTab() {
   );
 }
 
-function SectionTitle({
-  index,
-  children,
-}: {
-  index: number;
-  children: React.ReactNode;
-}) {
+function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-[18px] flex items-baseline justify-between border-t border-[var(--color-rule)] px-[22px] pt-[22px] pb-2.5 font-mono text-[10px] font-medium tracking-[0.16em] text-[var(--color-ink-3)] uppercase">
-      <span>
-        <span className="mr-2 text-[var(--color-ink-4)]">
-          {index.toString().padStart(2, '0')} /
-        </span>
-        {children}
-      </span>
+    <div className="px-4 pt-5 pb-2 text-[12px] font-semibold text-[var(--color-ink-3)]">
+      {children}
     </div>
   );
 }

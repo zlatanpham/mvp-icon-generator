@@ -85,10 +85,10 @@ export function UploadTab() {
   return (
     <>
       <label
-        className={`relative mt-[18px] mr-[22px] mb-3.5 ml-[22px] block cursor-pointer border border-dashed p-[38px_18px] text-center transition-colors ${
+        className={`relative mx-4 mt-4 mb-3 block cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
           dragging
             ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
-            : 'border-[var(--color-ink)] hover:bg-[var(--color-paper-2)]'
+            : 'border-[var(--color-line)] bg-[var(--color-paper-2)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-soft)]'
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -105,16 +105,16 @@ export function UploadTab() {
           if (f) void handleFile(f);
         }}
       >
-        <div className="mx-auto mb-3.5 grid h-10 w-10 place-items-center border border-[var(--color-ink)] text-[var(--color-ink)]">
-          <Upload className="h-[18px] w-[18px]" />
+        <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent-2)]">
+          <Upload className="h-5 w-5" />
         </div>
-        <div className="font-serif text-[18px] font-bold tracking-[-0.01em]">
+        <div className="text-[14px] font-semibold text-[var(--color-ink)]">
           Drop a file or browse
         </div>
-        <div className="mt-1 font-serif text-[13px] text-[var(--color-ink-3)] italic">
+        <div className="mt-1 text-[12px] text-[var(--color-ink-3)]">
           {busy ? 'Processing…' : 'Use your own logo or icon'}
         </div>
-        <div className="mt-3.5 font-mono text-[9.5px] tracking-[0.18em] text-[var(--color-ink-3)] uppercase">
+        <div className="mt-3 text-[11px] font-medium text-[var(--color-ink-4)]">
           SVG · 2 MB max
         </div>
         <input
@@ -131,26 +131,23 @@ export function UploadTab() {
       </label>
 
       {error && (
-        <div className="mx-[22px] mb-2 border border-[var(--color-accent)] bg-[var(--color-accent-soft)] p-2 text-[11px] text-[var(--color-accent-2)]">
+        <div className="mx-4 mb-2 rounded-md border border-[var(--color-destructive)] bg-red-50 p-2 text-[12px] text-[var(--color-destructive)]">
           {error}
         </div>
       )}
 
-      <div className="mt-[18px] flex items-baseline justify-between border-t border-[var(--color-rule)] px-[22px] pt-[22px] pb-2.5 font-mono text-[10px] font-medium tracking-[0.16em] text-[var(--color-ink-3)] uppercase">
-        <span>
-          <span className="mr-2 text-[var(--color-ink-4)]">02 /</span>
-          Recent uploads
-        </span>
+      <div className="px-4 pt-3 pb-2 text-[12px] font-semibold text-[var(--color-ink-3)]">
+        Recent uploads
       </div>
 
-      <div className="mx-[22px] grid grid-cols-4 gap-px bg-[var(--color-rule)]">
+      <div className="grid grid-cols-4 gap-2 px-4 pb-4">
         {Array.from({ length: MAX_RECENT }).map((_, i) => {
           const item = recent[i];
           if (!item) {
             return (
               <div
                 key={i}
-                className="grid aspect-square place-items-center bg-[var(--color-paper-2)] text-[var(--color-ink-3)]"
+                className="grid aspect-square place-items-center rounded-md border border-dashed border-[var(--color-line)] bg-[var(--color-paper-2)] text-[var(--color-ink-4)]"
               >
                 <ImageIcon className="h-3.5 w-3.5" />
               </div>
@@ -162,8 +159,10 @@ export function UploadTab() {
           return (
             <div
               key={item.id}
-              className={`group relative grid aspect-square place-items-center bg-[var(--color-paper-2)] ${
-                active ? 'outline outline-[2px] outline-[var(--color-ink)]' : ''
+              className={`group relative grid aspect-square place-items-center rounded-md border bg-[var(--color-paper-2)] transition ${
+                active
+                  ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]'
+                  : 'border-[var(--color-line)] hover:border-[var(--color-ink-4)]'
               }`}
             >
               <button
@@ -186,7 +185,7 @@ export function UploadTab() {
                 }}
                 title="Remove"
                 aria-label="Remove uploaded icon"
-                className="absolute top-1 right-1 hidden cursor-pointer rounded-sm bg-[var(--color-paper)] p-0.5 text-[var(--color-ink-3)] hover:text-[var(--color-accent)] group-hover:block"
+                className="absolute top-1 right-1 hidden cursor-pointer rounded-full bg-white p-0.5 text-[var(--color-ink-3)] shadow-soft hover:text-[var(--color-destructive)] group-hover:block"
               >
                 <X className="h-3 w-3" />
               </button>

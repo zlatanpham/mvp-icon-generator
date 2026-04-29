@@ -29,28 +29,27 @@ export function Sidebar() {
       className="flex min-h-0 flex-col border-r border-[var(--color-line)] bg-[var(--color-paper)]"
       style={{ width: 'var(--rail-l)' }}
     >
-      <div className="flex border-b border-[var(--color-line)]">
+      <div className="flex gap-1 border-b border-[var(--color-line)] p-2">
         <RailTab
           active={tab === 'library'}
           onClick={() => switchTab('library')}
-          icon={<LayoutGrid className="h-3.5 w-3.5" />}
+          icon={<LayoutGrid className="h-4 w-4" />}
           label="Library"
         />
         <RailTab
           active={tab === 'letters'}
           onClick={() => switchTab('letters')}
-          icon={<Type className="h-3.5 w-3.5" />}
+          icon={<Type className="h-4 w-4" />}
           label="Letters"
         />
         <RailTab
           active={tab === 'upload'}
           onClick={() => switchTab('upload')}
-          icon={<UploadIcon className="h-3.5 w-3.5" />}
+          icon={<UploadIcon className="h-4 w-4" />}
           label="Upload"
-          last
         />
       </div>
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="editorial-scroll flex flex-1 flex-col overflow-y-auto">
         {tab === 'library' && <LibraryTab />}
         {tab === 'letters' && <LettersTab />}
         {tab === 'upload' && <UploadTab />}
@@ -64,24 +63,20 @@ function RailTab({
   onClick,
   icon,
   label,
-  last,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
-  last?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex flex-1 cursor-pointer items-center justify-center gap-1.5 px-2 py-3.5 font-mono text-[10.5px] font-medium tracking-[0.12em] uppercase transition-colors ${
-        last ? '' : 'border-r border-[var(--color-line)]'
-      } ${
+      className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 py-2 text-[13px] font-medium transition-colors ${
         active
-          ? 'bg-[var(--color-bg)] text-[var(--color-ink)] after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:bg-[var(--color-accent)]'
-          : 'text-[var(--color-ink-3)] hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]'
+          ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent-2)]'
+          : 'text-[var(--color-ink-3)] hover:bg-[var(--color-paper-3)] hover:text-[var(--color-ink)]'
       }`}
     >
       {icon}

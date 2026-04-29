@@ -11,17 +11,11 @@ import { SvgStorage } from '@/lib/svg-storage';
 import type { UploadedSvg } from '@/lib/svg-processor';
 
 type Props = {
-  /** Visual size in px the icon should render at (the wrapper). */
   size?: number;
-  /** Optional radius override (defaults to design.radius). */
   radiusPct?: number;
-  /** Optional foreground stroke width override (used by smaller previews). */
   strokeWidth?: number;
-  /** Inline style on the wrapper (e.g. transform for zoom). */
   style?: CSSProperties;
-  /** Override design (for previews like phone/browser that pass static design). */
   design?: Design;
-  /** Disable the soft drop shadow (used inside frames). */
   noShadow?: boolean;
 };
 
@@ -46,16 +40,14 @@ export function AppIconHero({
 
   return (
     <div
-      className="relative grid place-items-center overflow-hidden"
+      className={`relative grid place-items-center overflow-hidden transition-[border-radius] duration-200 ${
+        noShadow ? '' : 'shadow-lifted'
+      }`}
       style={{
         width: size,
         height: size,
         borderRadius: `${radius}%`,
         background: backgroundCss(bg),
-        boxShadow: noShadow
-          ? undefined
-          : '0 30px 60px rgba(21,20,15,0.20), 0 8px 20px rgba(21,20,15,0.10)',
-        transition: 'border-radius .25s',
         ...style,
       }}
     >
@@ -69,7 +61,6 @@ export function AppIconHero({
       {content.mode === 'icon' ? (
         <IconLayer
           design={design}
-          size={size}
           contentSize={contentSize}
           foreground={foreground}
           strokeWidth={strokeWidth}
@@ -94,13 +85,11 @@ export function AppIconHero({
 
 function IconLayer({
   design,
-  size,
   contentSize,
   foreground,
   strokeWidth,
 }: {
   design: Design;
-  size: number;
   contentSize: number;
   foreground: string;
   strokeWidth: number;
@@ -121,7 +110,6 @@ function IconLayer({
     );
   }
 
-  // curated or lucide — both rendered as a single 24x24 SVG with a stroke or fill
   if (content.iconSource === 'lucide') {
     return (
       <LucideIconLayer
@@ -170,7 +158,6 @@ function LucideIconLayer({
   strokeWidth: number;
   style: CSSProperties;
 }) {
-  // Lazy import the icons map only on the client to avoid bundling all icons in SSR.
   const [Icon, setIcon] = useState<React.ComponentType<{
     color?: string;
     strokeWidth?: number;
@@ -236,7 +223,6 @@ function UploadedIconLayer({
 
   if (!svg) return null;
 
-  // Tint by replacing all explicit color attributes with currentColor and setting CSS color.
   const tinted = svg.sanitizedSvg
     .replace(/fill="(?!none)[^"]*"/gi, 'fill="currentColor"')
     .replace(/stroke="(?!none)[^"]*"/gi, 'stroke="currentColor"')
