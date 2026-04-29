@@ -24,7 +24,7 @@ export function Topbar() {
 
   return (
     <header
-      className="z-10 flex items-center gap-4 border-b border-[var(--color-line)] bg-[var(--color-paper)] px-5"
+      className="border-canva-strip z-10 flex items-center gap-4 bg-[var(--color-paper)] px-5"
       style={{ height: 'var(--topbar-h)' }}
     >
       <div className="flex items-center gap-2">

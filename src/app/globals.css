@@ -107,6 +107,60 @@
   .bg-canva-gradient:hover {
     background-image: linear-gradient(135deg, #7c2ff0 0%, #b22ee9 50%, #ff579b 100%);
   }
+  /* Canvas stage — tinted base + soft purple/pink radial glows + faint dot grid */
+  .bg-canvas-stage {
+    background-color: #f3f3fa;
+    background-image:
+      radial-gradient(
+        ellipse 80% 50% at 50% -10%,
+        rgba(139, 61, 255, 0.12) 0%,
+        rgba(139, 61, 255, 0) 60%
+      ),
+      radial-gradient(
+        ellipse 60% 60% at 100% 110%,
+        rgba(255, 108, 171, 0.10) 0%,
+        rgba(255, 108, 171, 0) 60%
+      ),
+      radial-gradient(
+        ellipse 50% 60% at -10% 100%,
+        rgba(64, 156, 255, 0.08) 0%,
+        rgba(64, 156, 255, 0) 60%
+      ),
+      radial-gradient(circle, rgba(14, 19, 24, 0.05) 1px, transparent 1.5px);
+    background-size:
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      22px 22px;
+    background-attachment: local, local, local, local;
+  }
+  /* Side rails — subtle vertical gradient so they don't feel flat-white */
+  .bg-rail-paper {
+    background-image: linear-gradient(180deg, #ffffff 0%, #fafafd 100%);
+  }
+  /* Thin gradient accent strip — used under the topbar for a touch of color */
+  .border-canva-strip {
+    box-shadow:
+      inset 0 -1px 0 var(--color-line),
+      0 1px 0 0 transparent;
+    position: relative;
+  }
+  .border-canva-strip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      rgba(139, 61, 255, 0) 0%,
+      rgba(139, 61, 255, 0.35) 30%,
+      rgba(255, 108, 171, 0.35) 70%,
+      rgba(255, 108, 171, 0) 100%
+    );
+    pointer-events: none;
+  }
   /* Slim editorial scrollbar (kept — neutral) */
   .editorial-scroll::-webkit-scrollbar {
     width: 8px;

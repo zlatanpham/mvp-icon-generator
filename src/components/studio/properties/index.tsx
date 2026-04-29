@@ -9,7 +9,7 @@ import { GrainSection } from './grain-section';
 export function Properties() {
   return (
     <aside
-      className="editorial-scroll flex min-h-0 flex-col overflow-y-auto border-l border-[var(--color-line)] bg-[var(--color-paper)]"
+      className="bg-rail-paper editorial-scroll flex min-h-0 flex-col overflow-y-auto border-l border-[var(--color-line)]"
       style={{ width: 'var(--rail-r)' }}
     >
       <div className="border-b border-[var(--color-line)] px-5 pt-5 pb-4">

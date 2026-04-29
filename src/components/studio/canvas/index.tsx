@@ -11,6 +11,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useDesign, INITIAL_DESIGN } from '@/lib/studio/design';
+import { backgroundCss } from '@/lib/studio/render/background-css';
 import { AppIconHero } from './app-icon-hero';
 import { SizeGrid } from './size-grid';
 import { PhonePreview } from './phone-preview';
@@ -39,7 +40,7 @@ export function Canvas() {
       data-canvas-pane
       className="relative flex min-h-0 flex-col overflow-hidden bg-[var(--color-bg)]"
     >
-      <div className="flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-paper)] px-5 py-3">
+      <div className="flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-paper)] px-5 py-3 shadow-[0_1px_0_0_rgba(255,255,255,1)]">
         <div className="flex items-center gap-1">
           <SurfaceTab
             active={surface === 'sizes'}
@@ -91,8 +92,26 @@ export function Canvas() {
         </div>
       </div>
 
-      <div className="editorial-scroll relative flex-1 overflow-y-auto px-10 pt-12 pb-12">
+      <div className="bg-canvas-stage editorial-scroll relative flex-1 overflow-y-auto px-10 pt-12 pb-12">
+        {/* Decorative floating shapes — soft, low-opacity, far behind everything */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-20 left-10 h-32 w-32 rounded-full opacity-30 blur-2xl"
+          style={{ background: 'linear-gradient(135deg, #8b3dff, #c13ff7)' }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-40 right-12 h-40 w-40 rounded-full opacity-25 blur-2xl"
+          style={{ background: 'linear-gradient(135deg, #ff6cab, #ffd166)' }}
+        />
+
         <div className="relative mx-auto grid max-w-[760px] place-items-center">
+          {/* Ambient halo — large blurred copy of the icon's own background */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute h-[420px] w-[420px] rounded-full opacity-35 blur-3xl"
+            style={{ background: backgroundCss(design.bg) }}
+          />
           <AppIconHero size={320} style={{ transform: `scale(${zoom / 100})` }} />
         </div>
 

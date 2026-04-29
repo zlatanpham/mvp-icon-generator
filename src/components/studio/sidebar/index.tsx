@@ -26,7 +26,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="flex min-h-0 flex-col border-r border-[var(--color-line)] bg-[var(--color-paper)]"
+      className="bg-rail-paper flex min-h-0 flex-col border-r border-[var(--color-line)]"
       style={{ width: 'var(--rail-l)' }}
     >
       <div className="flex gap-1 border-b border-[var(--color-line)] p-2">
