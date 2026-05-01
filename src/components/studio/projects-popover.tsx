@@ -102,7 +102,7 @@ export function ProjectsPopover() {
 
   const handleExportOne = (p: Project) => {
     const blob = projectFileBlob([p]);
-    const filename = `${slugifyName(p.design.name) || 'project'}.atelier.json`;
+    const filename = `${slugifyName(p.design.name) || 'project'}.instant-icon.json`;
     downloadJsonBlob(blob, filename);
   };
 
@@ -112,7 +112,7 @@ export function ProjectsPopover() {
     const picked = projects.filter(p => ids.includes(p.id));
     const blob = projectFileBlob(picked);
     const date = new Date().toISOString().slice(0, 10);
-    downloadJsonBlob(blob, `atelier-projects-${date}.json`);
+    downloadJsonBlob(blob, `instant-icon-projects-${date}.json`);
     setSelectMode(false);
     setSelected(new Set());
   };

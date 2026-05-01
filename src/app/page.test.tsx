@@ -15,7 +15,7 @@ vi.mock('next/font/google', () => {
 describe('Home', () => {
   it('renders the studio shell', () => {
     render(<Home />);
-    expect(screen.getByText('Atelier')).toBeInTheDocument();
+    expect(screen.getByText('Instant Icon')).toBeInTheDocument();
     // Properties heading split across nodes — match by role.
     expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument();
   });

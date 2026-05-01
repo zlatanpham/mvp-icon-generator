@@ -57,9 +57,7 @@ describe('SvgStorage', () => {
 
       SvgStorage.saveUploadedSvgs([svg]);
 
-      const stored = mockSessionStorage.getItem(
-        'mvp-icon-generator-uploaded-svgs',
-      );
+      const stored = mockSessionStorage.getItem('instant-icon-uploaded-svgs');
       expect(stored).toBeTruthy();
 
       const parsed = JSON.parse(stored!);
@@ -75,9 +73,7 @@ describe('SvgStorage', () => {
 
       SvgStorage.saveUploadedSvgs(svgs);
 
-      const stored = mockSessionStorage.getItem(
-        'mvp-icon-generator-uploaded-svgs',
-      );
+      const stored = mockSessionStorage.getItem('instant-icon-uploaded-svgs');
       const parsed = JSON.parse(stored!);
       expect(parsed).toHaveLength(10);
     });
@@ -120,10 +116,7 @@ describe('SvgStorage', () => {
     });
 
     it('should handle corrupted storage data gracefully', () => {
-      mockSessionStorage.setItem(
-        'mvp-icon-generator-uploaded-svgs',
-        'invalid json',
-      );
+      mockSessionStorage.setItem('instant-icon-uploaded-svgs', 'invalid json');
 
       const result = SvgStorage.loadUploadedSvgs();
       expect(result).toEqual([]);

@@ -1,10 +1,6 @@
-# MVP Icon Generator
+# Instant Icon
 
-A modern, intuitive web application for generating Progressive Web Application (MVP) icons with customizable colors, sizes, and styles. Built with Next.js 15, TypeScript, and Tailwind CSS.
-
-![MVP Icon Generator](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=flat-square&logo=tailwind-css)
+A modern, intuitive web application for generating Progressive Web App (PWA) icons with customizable colors, sizes, and styles. Built with Next.js 15, TypeScript, and Tailwind CSS.
 
 ## Features
 
@@ -15,11 +11,11 @@ A modern, intuitive web application for generating Progressive Web Application (
   - Icon color with color picker
   - Border radius adjustment (0-50%)
   - Icon size control (30-90%)
-- **Complete MVP Package**: Generates all required icon sizes and formats:
+- **Complete PWA Package**: Generates all required icon sizes and formats:
   - Favicons (16x16, 32x32, favicon.ico)
   - Apple Touch Icon (180x180)
   - Android Chrome icons (192x192, 512x512)
-  - MVP icons (48x48 to 1024x1024)
+  - PWA icons (48x48 to 1024x1024)
   - Maskable icons for Android
   - manifest.json file
   - HTML meta tags
@@ -69,7 +65,7 @@ pnpm dev
 
 The download package includes:
 
-- **Icons**: All standard MVP icon sizes from 16x16 to 1024x1024
+- **Icons**: All standard PWA icon sizes from 16x16 to 1024x1024
 - **favicon.ico**: Multi-resolution favicon
 - **manifest.json**: Pre-configured web app manifest
 - **html-meta-tags.txt**: Ready-to-use HTML meta tags

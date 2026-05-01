@@ -1,7 +1,11 @@
 import { UploadedSvg } from './svg-processor';
 
 export class SvgStorage {
-  private static readonly STORAGE_KEY = 'mvp-icon-generator-uploaded-svgs';
+  private static readonly STORAGE_KEY = 'instant-icon-uploaded-svgs';
+  private static readonly LEGACY_STORAGE_KEYS = [
+    'instanticon-uploaded-svgs',
+    'mvp-icon-generator-uploaded-svgs',
+  ];
   private static readonly MAX_STORED_SVGS = 10;
 
   static saveUploadedSvgs(svgs: UploadedSvg[]): void {
@@ -27,7 +31,19 @@ export class SvgStorage {
 
   static loadUploadedSvgs(): UploadedSvg[] {
     try {
-      const stored = sessionStorage.getItem(this.STORAGE_KEY);
+      let stored = sessionStorage.getItem(this.STORAGE_KEY);
+      if (stored === null) {
+        // One-time migration from any pre-rename key.
+        for (const legacyKey of this.LEGACY_STORAGE_KEYS) {
+          const legacy = sessionStorage.getItem(legacyKey);
+          if (legacy !== null) {
+            sessionStorage.setItem(this.STORAGE_KEY, legacy);
+            sessionStorage.removeItem(legacyKey);
+            stored = legacy;
+            break;
+          }
+        }
+      }
       if (!stored) return [];
 
       const storageData = JSON.parse(stored) as Array<{

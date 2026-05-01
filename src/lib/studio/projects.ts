@@ -26,7 +26,11 @@ type ProjectsState = {
   currentId: string;
 };
 
-const STORAGE_KEY = 'mvp-icon-generator-projects';
+const STORAGE_KEY = 'instant-icon-projects';
+const LEGACY_STORAGE_KEYS = [
+  'instanticon-projects',
+  'mvp-icon-generator-projects',
+];
 const STORAGE_VERSION = 1;
 
 type StorageWrapper = {
@@ -60,7 +64,19 @@ export const ProjectStore = {
   load(): ProjectsState {
     if (typeof window === 'undefined') return seedState();
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      let raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw === null) {
+        // One-time migration from any pre-rename key.
+        for (const legacyKey of LEGACY_STORAGE_KEYS) {
+          const legacy = window.localStorage.getItem(legacyKey);
+          if (legacy !== null) {
+            window.localStorage.setItem(STORAGE_KEY, legacy);
+            window.localStorage.removeItem(legacyKey);
+            raw = legacy;
+            break;
+          }
+        }
+      }
       if (!raw) return seedState();
       const parsed = JSON.parse(raw) as StorageWrapper | ProjectsState;
       const state = isWrapper(parsed) ? parsed.state : parsed;

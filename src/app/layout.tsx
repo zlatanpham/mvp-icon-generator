@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Atelier — App Icon Studio',
+  title: 'Instant Icon — App Icon Studio',
   description:
     'Design app icons with gradients, patterns, grain, and typography — export every size you need.',
 };

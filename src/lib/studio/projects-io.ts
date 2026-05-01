@@ -1,7 +1,7 @@
 import type { Design } from './design';
 import type { Project } from './projects';
 
-export const PROJECT_FILE_FORMAT = 'atelier-projects';
+export const PROJECT_FILE_FORMAT = 'instant-icon-projects';
 export const PROJECT_FILE_VERSION = 1;
 
 export type ProjectFile = {
@@ -63,7 +63,7 @@ export function parseProjectFile(text: string): ParseResult {
   if (raw.format !== PROJECT_FILE_FORMAT) {
     return {
       ok: false,
-      error: `Not an Atelier projects file (format=${String(raw.format)}).`,
+      error: `Not an Instant Icon projects file (format=${String(raw.format)}).`,
     };
   }
   if (raw.version !== PROJECT_FILE_VERSION) {

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a minimal Next.js 15 boilerplate for quickly starting new projects. It provides only the essential setup with no example pages or complex components - just a clean foundation.
+Instant Icon is a Next.js 15 web app for designing and exporting Progressive Web App (PWA) icon sets. Users design an icon in the browser (background, foreground, color, font, pattern, grain) and export a ZIP with every standard size, splash screens, a `manifest.json`, and ready-to-paste HTML meta tags. Projects are persisted locally and can be exported/imported as JSON.
 
 ## Commands
 
@@ -46,15 +46,15 @@ This is a minimal Next.js 15 boilerplate for quickly starting new projects. It p
 
 ### Key Patterns
 
-- **Minimal Setup**: No example pages or demo components
-- **Component Library**: shadcn/ui configured but no components pre-installed
-- **Type Safety**: Strict TypeScript configuration
-- **Testing**: Vitest configured with jsdom environment
-- **Path Aliases**: `@/*` maps to `./src/*`
+- **Studio shell**: The app is a single page (`src/app/page.tsx`) composed of `Topbar`, `Sidebar`, `Canvas`, and `Properties` panels.
+- **State**: `ProjectsProvider` (in `src/lib/studio/projects.ts`) owns the project list and persists to localStorage; `DesignProvider` (in `src/lib/studio/design.ts`) reads/writes the current project's design through it.
+- **Component Library**: shadcn/ui (New York style); add new primitives via `pnpm add:ui [component]`.
+- **Type Safety**: Strict TypeScript configuration.
+- **Testing**: Vitest with jsdom environment and React Testing Library.
+- **Path Aliases**: `@/*` maps to `./src/*`.
 
 ### Development Guidelines
 
-- Keep the boilerplate minimal - users will add what they need
-- Use shadcn/ui components via `pnpm add:ui [component]`
-- Follow Next.js App Router conventions
-- Write tests for new features
+- Use shadcn/ui components via `pnpm add:ui [component]` rather than hand-rolling primitives.
+- Follow Next.js App Router conventions.
+- Write tests for new features.

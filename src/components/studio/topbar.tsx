@@ -30,10 +30,10 @@ export function Topbar() {
     >
       <div className="flex items-center gap-2">
         <div className="bg-canva-gradient flex h-7 w-7 items-center justify-center rounded-md text-white">
-          <span className="text-[13px] leading-none font-extrabold">A</span>
+          <span className="text-[13px] leading-none font-extrabold">I</span>
         </div>
         <div className="text-[18px] font-extrabold tracking-[-0.01em] text-[var(--color-ink)]">
-          Atelier
+          Instant Icon
         </div>
       </div>
 
