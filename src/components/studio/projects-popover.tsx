@@ -35,6 +35,7 @@ import {
   type ImportRun,
   type ImportStats,
 } from './import-dialog';
+import { AppIconHero } from './canvas/app-icon-hero';
 
 export function ProjectsPopover() {
   const {
@@ -382,11 +383,9 @@ export function ProjectsPopover() {
                         aria-hidden
                       />
                     )}
-                    <div
-                      aria-hidden
-                      className="h-9 w-9 shrink-0 rounded-md border border-[var(--color-line)]"
-                      style={{ background: p.design.bg.color }}
-                    />
+                    <div aria-hidden className="shrink-0">
+                      <AppIconHero design={p.design} size={36} noShadow />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-medium text-[var(--color-ink)]">
                         {p.design.name || 'Untitled'}
