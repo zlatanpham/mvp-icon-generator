@@ -4,12 +4,12 @@ import {
   createContext,
   useCallback,
   useContext,
-  useState,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
 } from 'react';
 import { createElement } from 'react';
+import { useProjects } from './projects';
 
 export type BgType =
   | 'solid'
@@ -84,8 +84,7 @@ export const INITIAL_DESIGN: Design = {
     iconSource: 'curated',
     iconId: 'spark',
     iconName: 'Spark',
-    iconPath:
-      'M12 2L14 9.5L21.5 11L14.5 13L12 21L10 13L2.5 11L10.5 9.5Z',
+    iconPath: 'M12 2L14 9.5L21.5 11L14.5 13L12 21L10 13L2.5 11L10.5 9.5Z',
     filled: true,
     letters: 'A',
     font: 'Fraunces',
@@ -106,27 +105,29 @@ type DesignContext = {
 const Ctx = createContext<DesignContext | null>(null);
 
 export function DesignProvider({ children }: { children: ReactNode }) {
-  const [design, setDesign] = useState<Design>(INITIAL_DESIGN);
+  const { current, updateCurrentDesign } = useProjects();
+  const design = current.design;
+  const setDesign = updateCurrentDesign;
 
   const patchBg = useCallback(
     (patch: Partial<DesignBg>) =>
-      setDesign((d) => ({ ...d, bg: { ...d.bg, ...patch } })),
-    [],
+      setDesign(d => ({ ...d, bg: { ...d.bg, ...patch } })),
+    [setDesign],
   );
 
   const patchGradient = useCallback(
     (patch: Partial<DesignBg['gradient']>) =>
-      setDesign((d) => ({
+      setDesign(d => ({
         ...d,
         bg: { ...d.bg, gradient: { ...d.bg.gradient, ...patch } },
       })),
-    [],
+    [setDesign],
   );
 
   const patchContent = useCallback(
     (patch: Partial<DesignContent>) =>
-      setDesign((d) => ({ ...d, content: { ...d.content, ...patch } })),
-    [],
+      setDesign(d => ({ ...d, content: { ...d.content, ...patch } })),
+    [setDesign],
   );
 
   return createElement(
