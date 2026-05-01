@@ -253,11 +253,7 @@ function addEvenStops(grad: CanvasGradient, colors: string[]): void {
   });
 }
 
-function sampleStops(
-  colors: string[],
-  t: number,
-  closeLoop = false,
-): string {
+function sampleStops(colors: string[], t: number, closeLoop = false): string {
   // Used only by the conic fallback. Linear interpolation between adjacent stops.
   const list = closeLoop ? [...colors, colors[0]] : colors;
   const segs = list.length - 1;
@@ -332,6 +328,20 @@ async function paintGrainOverlay(
 // ============================================================================
 // Foreground (icon SVG or text glyph)
 // ============================================================================
+
+/**
+ * Paint just the foreground (icon SVG or text) centered in an `s × s` square
+ * at the current canvas origin. Splash screens use this — the foreground sits
+ * directly on the splash background with no wrapping icon tile.
+ */
+export async function paintForegroundCentered(
+  ctx: CanvasRenderingContext2D,
+  fg: PreparedForeground,
+  s: number,
+  contentSizePct: number,
+): Promise<void> {
+  return paintForeground(ctx, fg, s, contentSizePct);
+}
 
 async function paintForeground(
   ctx: CanvasRenderingContext2D,
@@ -413,7 +423,7 @@ function loadSvgImage(svg: string): Promise<HTMLImageElement> {
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((b) => {
+    canvas.toBlob(b => {
       if (b) resolve(b);
       else reject(new Error('Failed to convert canvas to blob'));
     }, 'image/png');

@@ -3,7 +3,7 @@ import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   paintDesignToBlob,
-  paintDesignToCanvas,
+  paintForegroundCentered,
   type PreparedForeground,
 } from './studio/canvas-painter';
 import type { Design } from './studio/design';
@@ -160,17 +160,19 @@ function curatedSvgString(path: string, fg: string, filled: boolean): string {
 
 async function lucideSvgString(name: string, fg: string): Promise<string> {
   const mod = await import('lucide-react');
-  const map = (mod as unknown as {
-    icons: Record<
-      string,
-      React.ComponentType<{
-        width?: number;
-        height?: number;
-        color?: string;
-        strokeWidth?: number;
-      }>
-    >;
-  }).icons;
+  const map = (
+    mod as unknown as {
+      icons: Record<
+        string,
+        React.ComponentType<{
+          width?: number;
+          height?: number;
+          color?: string;
+          strokeWidth?: number;
+        }>
+      >;
+    }
+  ).icons;
   const Comp = map[name];
   if (!Comp) throw new Error(`Lucide icon "${name}" not found`);
 
@@ -182,7 +184,7 @@ async function lucideSvgString(name: string, fg: string): Promise<string> {
 
   const root = createRoot(container);
   try {
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       root.render(
         createElement(Comp, {
           width: 24,
@@ -204,7 +206,7 @@ async function lucideSvgString(name: string, fg: string): Promise<string> {
     svgEl.setAttribute('stroke-width', '1.6');
     svgEl.setAttribute('stroke-linecap', 'round');
     svgEl.setAttribute('stroke-linejoin', 'round');
-    svgEl.querySelectorAll('*').forEach((el) => {
+    svgEl.querySelectorAll('*').forEach(el => {
       if (!(el instanceof SVGElement)) return;
       el.setAttribute('stroke', fg);
       if (!el.hasAttribute('stroke-width')) {
@@ -232,7 +234,7 @@ async function lucideSvgString(name: string, fg: string): Promise<string> {
 
 function uploadedSvgString(id: string, fg: string): string {
   const all = SvgStorage.loadUploadedSvgs();
-  const item = all.find((s) => s.id === id);
+  const item = all.find(s => s.id === id);
   if (!item) throw new Error('Uploaded SVG no longer in session');
   return item.sanitizedSvg
     .replace(/fill="(?!none)[^"]*"/gi, `fill="${fg}"`)
@@ -266,24 +268,21 @@ async function paintSplashScreen(
   ctx.fillStyle = design.bg.color;
   ctx.fillRect(0, 0, splash.width, splash.height);
 
-  // Render the icon onto an offscreen square, then drawImage to the splash.
+  // Paint the foreground content directly on the splash — no wrapping icon
+  // tile, the content sits over the backdrop.
   const isPhone = splash.height > splash.width && splash.height > 1700;
   const min = Math.min(splash.width, splash.height);
-  const iconSize = Math.round(min * 0.3 * (isPhone ? 1.5 : 1));
+  const slot = Math.round(min * 0.3 * (isPhone ? 1.5 : 1));
 
-  const iconCanvas = document.createElement('canvas');
-  iconCanvas.width = iconSize;
-  iconCanvas.height = iconSize;
-  const iconCtx = iconCanvas.getContext('2d');
-  if (!iconCtx) throw new Error('Failed to get 2D context');
-  await paintDesignToCanvas(iconCtx, design, fg, { size: iconSize });
-
-  const x = (splash.width - iconSize) / 2;
-  const y = (splash.height - iconSize) / 2;
-  ctx.drawImage(iconCanvas, x, y);
+  const x = (splash.width - slot) / 2;
+  const y = (splash.height - slot) / 2;
+  ctx.save();
+  ctx.translate(x, y);
+  await paintForegroundCentered(ctx, fg, slot, design.contentSize);
+  ctx.restore();
 
   return new Promise((resolve, reject) => {
-    canvas.toBlob((b) => {
+    canvas.toBlob(b => {
       if (b) resolve(b);
       else reject(new Error('Splash blob failed'));
     }, 'image/png');
@@ -295,7 +294,7 @@ async function paintSplashScreen(
 // ============================================================================
 
 function favicon32(blobs: { size: number; blob: Blob }[]): Blob {
-  const found = blobs.find((b) => b.size === 32) ?? blobs[0];
+  const found = blobs.find(b => b.size === 32) ?? blobs[0];
   return found?.blob;
 }
 
@@ -314,7 +313,7 @@ export function generateManifest(
       name: appName,
       short_name: appShortName,
       icons: ICON_SIZES.filter(
-        (s) =>
+        s =>
           !s.name.includes('favicon') &&
           !s.name.includes('apple') &&
           !s.name.includes('maskable'),
@@ -325,13 +324,19 @@ export function generateManifest(
           type: 'image/png',
         }))
         .concat(
-          ICON_SIZES.filter((s) => s.purpose === 'maskable').map(
-            ({ name, size }) => ({
-              src: `/${name}`,
-              sizes: `${size}x${size}`,
-              type: 'image/png',
-              purpose: 'maskable',
-            }) as { src: string; sizes: string; type: string; purpose?: string },
+          ICON_SIZES.filter(s => s.purpose === 'maskable').map(
+            ({ name, size }) =>
+              ({
+                src: `/${name}`,
+                sizes: `${size}x${size}`,
+                type: 'image/png',
+                purpose: 'maskable',
+              }) as {
+                src: string;
+                sizes: string;
+                type: string;
+                purpose?: string;
+              },
           ),
         ),
       theme_color: themeColor,

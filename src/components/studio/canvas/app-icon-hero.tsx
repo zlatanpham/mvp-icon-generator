@@ -17,6 +17,12 @@ type Props = {
   style?: CSSProperties;
   design?: Design;
   noShadow?: boolean;
+  /**
+   * Render only the foreground content (no background, overlays, or rounded
+   * clip). Used by the splash preview where the icon should appear directly
+   * over the splash background.
+   */
+  bare?: boolean;
 };
 
 export function AppIconHero({
@@ -26,6 +32,7 @@ export function AppIconHero({
   style,
   design: overrideDesign,
   noShadow,
+  bare,
 }: Props) {
   const ctx = useDesign();
   const design = overrideDesign ?? ctx.design;
@@ -37,6 +44,40 @@ export function AppIconHero({
       ensureFontLoaded(content.font, content.fontWeight);
     }
   }, [content.mode, content.font, content.fontWeight]);
+
+  const contentLayer =
+    content.mode === 'icon' ? (
+      <IconLayer
+        design={design}
+        contentSize={contentSize}
+        foreground={foreground}
+        strokeWidth={strokeWidth}
+      />
+    ) : (
+      <div
+        className="relative z-[2] text-center leading-none"
+        style={{
+          color: foreground,
+          fontFamily: fontStack(content.font),
+          fontWeight: content.fontWeight,
+          fontSize: `${size * (contentSize / 100) * 0.6}px`,
+          letterSpacing: '-0.03em',
+        }}
+      >
+        {content.letters || 'A'}
+      </div>
+    );
+
+  if (bare) {
+    return (
+      <div
+        className="relative grid place-items-center"
+        style={{ width: size, height: size, ...style }}
+      >
+        {contentLayer}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -57,28 +98,7 @@ export function AppIconHero({
         opacity={bg.patternOpacity}
       />
       <GrainOverlay amount={bg.grain} />
-
-      {content.mode === 'icon' ? (
-        <IconLayer
-          design={design}
-          contentSize={contentSize}
-          foreground={foreground}
-          strokeWidth={strokeWidth}
-        />
-      ) : (
-        <div
-          className="relative z-[2] text-center leading-none"
-          style={{
-            color: foreground,
-            fontFamily: fontStack(content.font),
-            fontWeight: content.fontWeight,
-            fontSize: `${size * (contentSize / 100) * 0.6}px`,
-            letterSpacing: '-0.03em',
-          }}
-        >
-          {content.letters || 'A'}
-        </div>
-      )}
+      {contentLayer}
     </div>
   );
 }
@@ -123,10 +143,7 @@ function IconLayer({
   }
 
   return (
-    <div
-      className="relative z-[2] grid place-items-center"
-      style={innerStyle}
-    >
+    <div className="relative z-[2] grid place-items-center" style={innerStyle}>
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -167,17 +184,20 @@ function LucideIconLayer({
 
   useEffect(() => {
     let cancelled = false;
-    import('lucide-react').then((mod) => {
+    import('lucide-react').then(mod => {
       if (cancelled) return;
       const map = (mod as unknown as { icons: Record<string, unknown> }).icons;
       const found = map?.[iconName];
       if (found) {
-        setIcon(() => found as React.ComponentType<{
-          color?: string;
-          strokeWidth?: number;
-          fill?: string;
-          className?: string;
-        }>);
+        setIcon(
+          () =>
+            found as React.ComponentType<{
+              color?: string;
+              strokeWidth?: number;
+              fill?: string;
+              className?: string;
+            }>,
+        );
       } else {
         setIcon(null);
       }
@@ -213,12 +233,15 @@ function UploadedIconLayer({
   const [svg, setSvg] = useState<UploadedSvg | null>(null);
 
   useEffect(() => {
-    if (!uploadedId) {
-      setSvg(null);
-      return;
-    }
-    const all = SvgStorage.loadUploadedSvgs();
-    setSvg(all.find((s) => s.id === uploadedId) ?? null);
+    // SvgStorage reads sessionStorage which only exists on the client, so we
+    // load on mount/prop-change rather than during render to avoid SSR
+    // hydration mismatches.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSvg(
+      uploadedId
+        ? (SvgStorage.loadUploadedSvgs().find(s => s.id === uploadedId) ?? null)
+        : null,
+    );
   }, [uploadedId]);
 
   if (!svg) return null;

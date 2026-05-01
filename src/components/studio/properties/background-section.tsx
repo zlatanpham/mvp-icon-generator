@@ -1,10 +1,17 @@
 'use client';
 
+import { useState } from 'react';
+import { HexColorPicker } from 'react-colorful';
 import { useDesign, type BgType } from '@/lib/studio/design';
 import { BG_TYPES } from '@/lib/studio/data/bg-types';
 import { SWATCHES } from '@/lib/studio/data/swatches';
 import { GRADIENTS } from '@/lib/studio/data/gradients';
 import { patternDataUrl } from '@/lib/studio/render/pattern-svg';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 export function BackgroundSection() {
   const { design, patchBg, patchGradient } = useDesign();
@@ -37,7 +44,7 @@ export function BackgroundSection() {
   return (
     <>
       <div className="mb-4 grid grid-cols-4 gap-2">
-        {BG_TYPES.map((t) => (
+        {BG_TYPES.map(t => (
           <BgTypeButton
             key={t.id}
             id={t.id}
@@ -49,10 +56,7 @@ export function BackgroundSection() {
       </div>
 
       {bg.type === 'solid' && (
-        <SolidControls
-          value={bg.color}
-          onChange={(c) => patchBg({ color: c })}
-        />
+        <SolidControls value={bg.color} onChange={c => patchBg({ color: c })} />
       )}
 
       {isGradientType && (
@@ -60,7 +64,7 @@ export function BackgroundSection() {
           colors={bg.gradient.colors}
           angle={bg.gradient.angle}
           type={bg.type}
-          onChange={(p) => patchGradient(p)}
+          onChange={p => patchGradient(p)}
         />
       )}
     </>
@@ -121,13 +125,10 @@ function BgTypeButton({
       className={`group relative flex aspect-square cursor-pointer flex-col items-center justify-between rounded-lg border p-1.5 transition-all ${
         active
           ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] ring-2 ring-[var(--color-accent)]'
-          : 'border-[var(--color-line)] bg-[var(--color-paper-2)] hover:border-[var(--color-ink-4)] hover:shadow-soft'
+          : 'hover:shadow-soft border-[var(--color-line)] bg-[var(--color-paper-2)] hover:border-[var(--color-ink-4)]'
       }`}
     >
-      <div
-        className="h-7 w-7 rounded-md"
-        style={swatchStyle}
-      />
+      <div className="h-7 w-7 rounded-md" style={swatchStyle} />
       <div
         className={`text-[9.5px] font-semibold ${
           active ? 'text-[var(--color-accent-2)]' : 'text-[var(--color-ink-3)]'
@@ -146,18 +147,10 @@ function SolidControls({
   value: string;
   onChange: (c: string) => void;
 }) {
-  return (
-    <>
-      <ColorRow value={value} onChange={onChange} />
-      <div className="mt-3 mb-2 text-[12px] font-semibold text-[var(--color-ink-3)]">
-        Swatches
-      </div>
-      <SwatchGrid current={value} onPick={onChange} />
-    </>
-  );
+  return <ColorRow value={value} onChange={onChange} />;
 }
 
-export function ColorRow({
+export function ColorPickerPanel({
   value,
   onChange,
 }: {
@@ -165,25 +158,73 @@ export function ColorRow({
   onChange: (c: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-md border border-[var(--color-line)] bg-[var(--color-paper-2)] p-2 transition-colors focus-within:border-[var(--color-accent)] focus-within:bg-white">
-      <div
-        className="h-6 w-6 flex-shrink-0 rounded-md"
-        style={{
-          background: value,
-          boxShadow: 'inset 0 0 0 1px rgba(14,19,24,.1)',
-        }}
+    <>
+      <HexColorPicker
+        color={value}
+        onChange={onChange}
+        style={{ width: '100%', height: 160 }}
       />
+      <div className="mt-3">
+        <ColorRow value={value} onChange={onChange} compact />
+      </div>
+      <div className="mt-3">
+        <SwatchGrid current={value} onPick={onChange} />
+      </div>
+    </>
+  );
+}
+
+export function ColorRow({
+  value,
+  onChange,
+  compact = false,
+}: {
+  value: string;
+  onChange: (c: string) => void;
+  compact?: boolean;
+}) {
+  const swatch = (
+    <div
+      className="h-6 w-6 flex-shrink-0 rounded-md"
+      style={{
+        background: value,
+        boxShadow: 'inset 0 0 0 1px rgba(14,19,24,.1)',
+      }}
+    />
+  );
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-[var(--color-line)] bg-[var(--color-paper-2)] p-2 transition-colors focus-within:border-[var(--color-accent)] focus-within:bg-white">
+      {compact ? (
+        swatch
+      ) : (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label="Open color picker"
+              className="cursor-pointer rounded-md transition-transform hover:scale-105 focus-visible:outline-none"
+            >
+              {swatch}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="start" className="w-64 p-3">
+            <ColorPickerPanel value={value} onChange={onChange} />
+          </PopoverContent>
+        </Popover>
+      )}
       <input
-        className="flex-1 bg-transparent font-mono text-[12px] tracking-[0.04em] text-[var(--color-ink)] uppercase outline-none"
+        className="w-0 flex-1 bg-transparent font-mono text-[12px] tracking-[0.04em] text-[var(--color-ink)] uppercase outline-none"
         value={value.replace('#', '').toUpperCase()}
-        onChange={(e) => {
+        onChange={e => {
           const v = e.target.value.replace('#', '');
           onChange('#' + v);
         }}
       />
-      <span className="border-l border-[var(--color-line)] pl-2 font-mono text-[11px] text-[var(--color-ink-3)]">
-        100%
-      </span>
+      {!compact && (
+        <span className="border-l border-[var(--color-line)] pl-2 font-mono text-[11px] text-[var(--color-ink-3)]">
+          100%
+        </span>
+      )}
     </div>
   );
 }
@@ -197,7 +238,7 @@ export function SwatchGrid({
 }) {
   return (
     <div className="grid grid-cols-8 gap-1.5">
-      {SWATCHES.map((c) => {
+      {SWATCHES.map(c => {
         const active = current.toUpperCase() === c.toUpperCase();
         return (
           <button
@@ -229,6 +270,13 @@ function GradientControls({
   type: BgType;
   onChange: (p: { colors?: string[]; angle?: number }) => void;
 }) {
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  // Clamp at read-time so the popover auto-closes if a stop is removed while
+  // the picker for it is open — no effect needed.
+  const activeEditingIdx =
+    editingIdx !== null && editingIdx < colors.length ? editingIdx : null;
+  const updateStop = (i: number, next: string) =>
+    onChange({ colors: colors.map((c, j) => (j === i ? next : c)) });
   return (
     <>
       <div className="mb-4 flex items-center gap-3">
@@ -264,16 +312,38 @@ function GradientControls({
             }}
           >
             {colors.map((c, i) => (
-              <div
+              <Popover
                 key={i}
-                className="absolute top-full mt-1.5 h-3 w-3 -translate-x-1/2 rounded-full ring-2 ring-white"
-                style={{
-                  left: `${(i / Math.max(1, colors.length - 1)) * 100}%`,
-                  background: c,
-                  boxShadow:
-                    '0 0 0 1px rgba(14,19,24,.15), 0 2px 4px rgba(14,19,24,.1)',
-                }}
-              />
+                open={activeEditingIdx === i}
+                onOpenChange={o => setEditingIdx(o ? i : null)}
+              >
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`Edit color stop ${i + 1}`}
+                    className="absolute top-full mt-1.5 h-3 w-3 -translate-x-1/2 cursor-pointer rounded-full ring-2 ring-white transition-transform hover:scale-110 focus-visible:scale-110 focus-visible:outline-none"
+                    style={{
+                      left: `${(i / Math.max(1, colors.length - 1)) * 100}%`,
+                      background: c,
+                      boxShadow:
+                        '0 0 0 1px rgba(14,19,24,.15), 0 2px 4px rgba(14,19,24,.1)',
+                    }}
+                  />
+                </PopoverTrigger>
+                <PopoverContent
+                  side="bottom"
+                  align="center"
+                  className="w-64 p-3"
+                >
+                  <div className="mb-2 text-[11px] font-semibold text-[var(--color-ink-3)]">
+                    Stop {i + 1}
+                  </div>
+                  <ColorPickerPanel
+                    value={colors[i]}
+                    onChange={next => updateStop(i, next)}
+                  />
+                </PopoverContent>
+              </Popover>
             ))}
           </div>
         </div>
@@ -283,7 +353,7 @@ function GradientControls({
         Gradient palettes
       </div>
       <div className="flex flex-col gap-1">
-        {GRADIENTS.map((g) => {
+        {GRADIENTS.map(g => {
           const active = JSON.stringify(g.colors) === JSON.stringify(colors);
           return (
             <button
@@ -298,16 +368,14 @@ function GradientControls({
             >
               <div className="flex h-5 flex-1 overflow-hidden rounded-md">
                 {g.colors.map((c, i) => (
-                  <span
-                    key={i}
-                    className="flex-1"
-                    style={{ background: c }}
-                  />
+                  <span key={i} className="flex-1" style={{ background: c }} />
                 ))}
               </div>
               <div
                 className={`min-w-[80px] text-[13px] font-semibold ${
-                  active ? 'text-[var(--color-accent-2)]' : 'text-[var(--color-ink)]'
+                  active
+                    ? 'text-[var(--color-accent-2)]'
+                    : 'text-[var(--color-ink)]'
                 }`}
               >
                 {g.name}
