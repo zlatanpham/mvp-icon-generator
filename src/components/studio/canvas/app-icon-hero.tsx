@@ -96,6 +96,7 @@ export function AppIconHero({
         pattern={bg.pattern}
         color={bg.patternColor}
         opacity={bg.patternOpacity}
+        size={size}
       />
       <GrainOverlay amount={bg.grain} />
       {contentLayer}

@@ -1,5 +1,5 @@
 import type { Design, DesignBg } from './design';
-import { patternSvgMarkup } from './data/patterns';
+import { PATTERN_REFERENCE_SIZE, patternSvgMarkup } from './data/patterns';
 import { grainSvgMarkup } from './render/grain-svg';
 
 /**
@@ -319,9 +319,23 @@ async function paintPatternOverlay(
   w: number,
   h: number,
 ): Promise<void> {
-  const { svg } = patternSvgMarkup(pattern, color);
+  const { svg, tile } = patternSvgMarkup(pattern, color);
   const img = await loadSvgImage(svg);
-  const css = ctx.createPattern(img, 'repeat');
+  // Scale the tile so a 32×32 favicon and a 1024×1024 icon show the same
+  // density. min(w,h) is the basis so non-square splash exports keep tiles
+  // proportional to the icon side rather than stretching across the long axis.
+  const scale = Math.min(w, h) / PATTERN_REFERENCE_SIZE;
+  const tileW = Math.max(1, tile.w * scale);
+  const tileH = Math.max(1, tile.h * scale);
+  // Pre-rasterize the tile at its scaled size, then repeat — createPattern
+  // tiles at the source canvas's pixel size with no built-in scaling.
+  const tileCanvas = document.createElement('canvas');
+  tileCanvas.width = Math.ceil(tileW);
+  tileCanvas.height = Math.ceil(tileH);
+  const tctx = tileCanvas.getContext('2d');
+  if (!tctx) return;
+  tctx.drawImage(img, 0, 0, tileW, tileH);
+  const css = ctx.createPattern(tileCanvas, 'repeat');
   if (!css) return;
   ctx.save();
   ctx.globalAlpha = opacity;

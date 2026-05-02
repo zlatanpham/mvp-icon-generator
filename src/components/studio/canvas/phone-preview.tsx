@@ -122,6 +122,7 @@ export function PhonePreview() {
                   pattern={design.bg.pattern}
                   color={design.bg.patternColor}
                   opacity={design.bg.patternOpacity}
+                  size={SPLASH_INNER_MIN}
                 />
                 <GrainOverlay amount={design.bg.grain} />
                 <div className="relative z-[2]">
