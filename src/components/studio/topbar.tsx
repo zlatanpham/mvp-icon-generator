@@ -1,14 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import { Download, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Download, Loader2, Redo2, Undo2 } from 'lucide-react';
 import { useDesign } from '@/lib/studio/design';
 import { exportDesign } from '@/lib/studio/export';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { ProjectsPopover } from './projects-popover';
 
+function isMacPlatform(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } })
+      .userAgentData?.platform ?? navigator.platform;
+  return /Mac|iPhone|iPad|iPod/i.test(platform);
+}
+
 export function Topbar() {
-  const { design, setDesign } = useDesign();
+  const { design, setDesign, canUndo, canRedo, undo, redo } = useDesign();
   const [busy, setBusy] = useState(false);
+  const [isMac, setIsMac] = useState(false);
+
+  useEffect(() => {
+    // Platform detection has to happen on the client; rendering a
+    // platform-specific shortcut string on the server would either be wrong or
+    // cause a hydration mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMac(isMacPlatform());
+  }, []);
 
   const handleExport = async () => {
     if (busy) return;
@@ -22,6 +45,9 @@ export function Topbar() {
       setBusy(false);
     }
   };
+
+  const undoHint = isMac ? '⌘Z' : 'Ctrl+Z';
+  const redoHint = isMac ? '⌘⇧Z' : 'Ctrl+Shift+Z';
 
   return (
     <header
@@ -48,21 +74,54 @@ export function Topbar() {
         />
       </div>
 
-      <div className="ml-auto">
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={busy}
-          className="bg-canva-gradient shadow-soft inline-flex h-9 cursor-pointer items-center gap-2 rounded-full px-5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-progress disabled:opacity-70"
-        >
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="h-4 w-4" />
-          )}
-          <span>{busy ? 'Exporting…' : 'Export'}</span>
-        </button>
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div className="ml-auto flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={undo}
+                  disabled={!canUndo}
+                  aria-label="Undo"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-line)] bg-transparent text-[var(--color-ink-2)] transition-colors hover:border-[var(--color-ink-3)] hover:bg-white hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[var(--color-line)] disabled:hover:bg-transparent disabled:hover:text-[var(--color-ink-2)]"
+                >
+                  <Undo2 className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Undo ({undoHint})</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={redo}
+                  disabled={!canRedo}
+                  aria-label="Redo"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-line)] bg-transparent text-[var(--color-ink-2)] transition-colors hover:border-[var(--color-ink-3)] hover:bg-white hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[var(--color-line)] disabled:hover:bg-transparent disabled:hover:text-[var(--color-ink-2)]"
+                >
+                  <Redo2 className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Redo ({redoHint})</TooltipContent>
+            </Tooltip>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={busy}
+            className="bg-canva-gradient shadow-soft inline-flex h-9 cursor-pointer items-center gap-2 rounded-full px-5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-progress disabled:opacity-70"
+          >
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span>{busy ? 'Exporting…' : 'Export'}</span>
+          </button>
+        </div>
+      </TooltipProvider>
     </header>
   );
 }
