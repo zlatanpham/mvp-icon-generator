@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
+  paintBackdrop,
   paintDesignToBlob,
   paintForegroundCentered,
   type PreparedForeground,
@@ -264,9 +265,9 @@ async function paintSplashScreen(
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Failed to get 2D context');
 
-  // Solid splash backdrop (manifest theme color = design.bg.color).
-  ctx.fillStyle = design.bg.color;
-  ctx.fillRect(0, 0, splash.width, splash.height);
+  // Paint the full designed backdrop (gradient + pattern + grain) so the
+  // exported splash matches the on-screen preview.
+  await paintBackdrop(ctx, design, splash.width, splash.height);
 
   // Paint the foreground content directly on the splash — no wrapping icon
   // tile, the content sits over the backdrop.

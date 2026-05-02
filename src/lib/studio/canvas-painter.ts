@@ -55,7 +55,25 @@ export async function paintDesignToCanvas(
     ctx.clip();
   }
 
-  await paintBackground(ctx, design.bg, s);
+  await paintBackdrop(ctx, design, s, s);
+
+  await paintForeground(ctx, fg, s, contentSize);
+
+  ctx.restore();
+}
+
+/**
+ * Paint just the background layers (color/gradient + pattern + grain) into a
+ * rectangular region anchored at the current canvas origin. Shared between the
+ * square icon export and the rectangular splash export.
+ */
+export async function paintBackdrop(
+  ctx: CanvasRenderingContext2D,
+  design: Design,
+  w: number,
+  h: number,
+): Promise<void> {
+  await paintBackground(ctx, design.bg, w, h);
 
   if (design.bg.pattern !== 'none') {
     await paintPatternOverlay(
@@ -63,16 +81,13 @@ export async function paintDesignToCanvas(
       design.bg.pattern,
       design.bg.patternColor,
       design.bg.patternOpacity,
-      s,
+      w,
+      h,
     );
   }
   if (design.bg.grain > 0) {
-    await paintGrainOverlay(ctx, design.bg.grain, s);
+    await paintGrainOverlay(ctx, design.bg.grain, w, h);
   }
-
-  await paintForeground(ctx, fg, s, contentSize);
-
-  ctx.restore();
 }
 
 /**
@@ -99,29 +114,30 @@ export async function paintDesignToBlob(
 async function paintBackground(
   ctx: CanvasRenderingContext2D,
   bg: DesignBg,
-  s: number,
+  w: number,
+  h: number,
 ): Promise<void> {
   switch (bg.type) {
     case 'solid':
       ctx.fillStyle = bg.color;
-      ctx.fillRect(0, 0, s, s);
+      ctx.fillRect(0, 0, w, h);
       return;
     case 'linear':
-      paintLinearGradient(ctx, bg.gradient.colors, bg.gradient.angle, s);
+      paintLinearGradient(ctx, bg.gradient.colors, bg.gradient.angle, w, h);
       return;
     case 'radial':
-      paintRadialGradient(ctx, bg.gradient.colors, s);
+      paintRadialGradient(ctx, bg.gradient.colors, w, h);
       return;
     case 'conic':
-      paintConicGradient(ctx, bg.gradient.colors, bg.gradient.angle, s);
+      paintConicGradient(ctx, bg.gradient.colors, bg.gradient.angle, w, h);
       return;
     case 'mesh':
-      paintMeshGradient(ctx, bg.gradient.colors, s);
+      paintMeshGradient(ctx, bg.gradient.colors, w, h);
       return;
     case 'pattern':
     case 'noise':
       ctx.fillStyle = bg.color;
-      ctx.fillRect(0, 0, s, s);
+      ctx.fillRect(0, 0, w, h);
       return;
   }
 }
@@ -130,16 +146,17 @@ function paintLinearGradient(
   ctx: CanvasRenderingContext2D,
   colors: string[],
   angleDeg: number,
-  s: number,
+  w: number,
+  h: number,
 ): void {
   // CSS linear-gradient: 0deg = up, increasing clockwise.
   const rad = angleDeg * DEG;
   const dx = Math.sin(rad);
   const dy = -Math.cos(rad);
   // CSS spec: gradient line length covers projection of corners onto the line.
-  const L = (Math.abs(s * dx) + Math.abs(s * dy)) / 1;
-  const cx = s / 2;
-  const cy = s / 2;
+  const L = Math.abs(w * dx) + Math.abs(h * dy);
+  const cx = w / 2;
+  const cy = h / 2;
   const x0 = cx - (dx * L) / 2;
   const y0 = cy - (dy * L) / 2;
   const x1 = cx + (dx * L) / 2;
@@ -147,32 +164,34 @@ function paintLinearGradient(
   const grad = ctx.createLinearGradient(x0, y0, x1, y1);
   addEvenStops(grad, colors);
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, s, s);
+  ctx.fillRect(0, 0, w, h);
 }
 
 function paintRadialGradient(
   ctx: CanvasRenderingContext2D,
   colors: string[],
-  s: number,
+  w: number,
+  h: number,
 ): void {
   // Mockup uses `radial-gradient(circle at 30% 30%, …)` (farthest-corner default).
-  const cx = 0.3 * s;
-  const cy = 0.3 * s;
-  const r = Math.hypot(s - cx, s - cy);
+  const cx = 0.3 * w;
+  const cy = 0.3 * h;
+  const r = Math.hypot(w - cx, h - cy);
   const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
   addEvenStops(grad, colors);
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, s, s);
+  ctx.fillRect(0, 0, w, h);
 }
 
 function paintConicGradient(
   ctx: CanvasRenderingContext2D,
   colors: string[],
   angleDeg: number,
-  s: number,
+  w: number,
+  h: number,
 ): void {
-  const cx = s / 2;
-  const cy = s / 2;
+  const cx = w / 2;
+  const cy = h / 2;
   // CSS `from 0deg` starts at top (north). Canvas conic 0 rad points east.
   const startAngle = (angleDeg - 90) * DEG;
   // Modern browsers (Chrome/Safari/Firefox 2024+) support createConicGradient.
@@ -190,12 +209,12 @@ function paintConicGradient(
     const closed = [...colors, colors[0]];
     addEvenStops(grad, closed);
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, s, s);
+    ctx.fillRect(0, 0, w, h);
     return;
   }
   // Fallback: scan with thin pie slices.
   const slices = 360;
-  const r = Math.hypot(s, s);
+  const r = Math.hypot(w, h);
   for (let i = 0; i < slices; i++) {
     const t = i / slices;
     const next = (i + 1) / slices;
@@ -213,18 +232,22 @@ function paintConicGradient(
 function paintMeshGradient(
   ctx: CanvasRenderingContext2D,
   colors: string[],
-  s: number,
+  w: number,
+  h: number,
 ): void {
   const a = colors[0];
   const b = colors[1] ?? a;
   const c = colors[2] ?? a;
   // Solid base (matches CSS where the last image is at the bottom).
   ctx.fillStyle = a;
-  ctx.fillRect(0, 0, s, s);
+  ctx.fillRect(0, 0, w, h);
+  // Blob radius scales with the smaller axis so non-square canvases (splash
+  // screens) keep blobs proportionate rather than smearing across the long axis.
+  const r = 0.55 * Math.min(w, h);
   // Bottom-up: paint blob3, blob2, blob1 so blob1 ends up on top.
-  paintMeshBlob(ctx, c, 0.5 * s, 0.88 * s, 0.55 * s);
-  paintMeshBlob(ctx, b, 0.82 * s, 0.3 * s, 0.55 * s);
-  paintMeshBlob(ctx, a, 0.18 * s, 0.22 * s, 0.55 * s);
+  paintMeshBlob(ctx, c, 0.5 * w, 0.88 * h, r);
+  paintMeshBlob(ctx, b, 0.82 * w, 0.3 * h, r);
+  paintMeshBlob(ctx, a, 0.18 * w, 0.22 * h, r);
 }
 
 function paintMeshBlob(
@@ -293,7 +316,8 @@ async function paintPatternOverlay(
   pattern: Exclude<DesignBg['pattern'], 'none'>,
   color: string,
   opacity: number,
-  s: number,
+  w: number,
+  h: number,
 ): Promise<void> {
   const { svg } = patternSvgMarkup(pattern, color);
   const img = await loadSvgImage(svg);
@@ -302,14 +326,15 @@ async function paintPatternOverlay(
   ctx.save();
   ctx.globalAlpha = opacity;
   ctx.fillStyle = css;
-  ctx.fillRect(0, 0, s, s);
+  ctx.fillRect(0, 0, w, h);
   ctx.restore();
 }
 
 async function paintGrainOverlay(
   ctx: CanvasRenderingContext2D,
   amount: number,
-  s: number,
+  w: number,
+  h: number,
 ): Promise<void> {
   const img = await loadSvgImage(grainSvgMarkup());
   ctx.save();
@@ -317,8 +342,8 @@ async function paintGrainOverlay(
   ctx.globalCompositeOperation = 'overlay';
   // Tile by drawing repeatedly — simpler and equivalent to the DOM background-repeat.
   const tile = 200;
-  for (let y = 0; y < s; y += tile) {
-    for (let x = 0; x < s; x += tile) {
+  for (let y = 0; y < h; y += tile) {
+    for (let x = 0; x < w; x += tile) {
       ctx.drawImage(img, x, y, tile, tile);
     }
   }
