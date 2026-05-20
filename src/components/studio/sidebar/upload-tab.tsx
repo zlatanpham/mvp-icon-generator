@@ -16,6 +16,9 @@ export function UploadTab() {
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
+    // Hydrate from localStorage on mount. The lint rule for "setState in
+    // effect" doesn't apply here — we're syncing in from an external store.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRecent(SvgStorage.loadUploadedSvgs());
   }, []);
 
@@ -29,10 +32,10 @@ export function UploadTab() {
         return;
       }
       const uploaded = SvgProcessor.createUploadedSvg(file, result);
-      const next = [uploaded, ...recent.filter((r) => r.id !== uploaded.id)].slice(
-        0,
-        MAX_RECENT,
-      );
+      const next = [
+        uploaded,
+        ...recent.filter(r => r.id !== uploaded.id),
+      ].slice(0, MAX_RECENT);
       SvgStorage.saveUploadedSvgs(next);
       setRecent(next);
       patchContent({
@@ -51,7 +54,7 @@ export function UploadTab() {
   };
 
   const onSelect = (id: string) => {
-    const item = recent.find((r) => r.id === id);
+    const item = recent.find(r => r.id === id);
     if (!item) return;
     patchContent({
       mode: 'icon',
@@ -75,8 +78,7 @@ export function UploadTab() {
         iconSource: 'curated',
         iconId: 'spark',
         iconName: 'Spark',
-        iconPath:
-          'M12 2L14 9.5L21.5 11L14.5 13L12 21L10 13L2.5 11L10.5 9.5Z',
+        iconPath: 'M12 2L14 9.5L21.5 11L14.5 13L12 21L10 13L2.5 11L10.5 9.5Z',
         uploadedSvgId: undefined,
       });
     }
@@ -90,15 +92,15 @@ export function UploadTab() {
             ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
             : 'border-[var(--color-line)] bg-[var(--color-paper-2)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-soft)]'
         }`}
-        onDragOver={(e) => {
+        onDragOver={e => {
           e.preventDefault();
           setDragging(true);
         }}
-        onDragLeave={(e) => {
+        onDragLeave={e => {
           e.preventDefault();
           setDragging(false);
         }}
-        onDrop={(e) => {
+        onDrop={e => {
           e.preventDefault();
           setDragging(false);
           const f = e.dataTransfer.files?.[0];
@@ -121,7 +123,7 @@ export function UploadTab() {
           type="file"
           accept=".svg,image/svg+xml"
           className="absolute inset-0 cursor-pointer opacity-0"
-          onChange={(e) => {
+          onChange={e => {
             const f = e.target.files?.[0];
             if (f) void handleFile(f);
             e.target.value = '';
@@ -159,11 +161,18 @@ export function UploadTab() {
           return (
             <div
               key={item.id}
-              className={`group relative grid aspect-square place-items-center rounded-md border bg-[var(--color-paper-2)] transition ${
+              className={`group relative grid aspect-square place-items-center overflow-hidden rounded-md border transition ${
                 active
                   ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]'
                   : 'border-[var(--color-line)] hover:border-[var(--color-ink-4)]'
               }`}
+              style={{
+                backgroundColor: 'var(--color-paper-2)',
+                backgroundImage:
+                  'linear-gradient(45deg, rgba(0,0,0,0.06) 25%, transparent 25%), linear-gradient(-45deg, rgba(0,0,0,0.06) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.06) 75%), linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.06) 75%)',
+                backgroundSize: '10px 10px',
+                backgroundPosition: '0 0, 0 5px, 5px -5px, -5px 0',
+              }}
             >
               <button
                 type="button"
@@ -179,13 +188,13 @@ export function UploadTab() {
               />
               <button
                 type="button"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   onRemove(item.id);
                 }}
                 title="Remove"
                 aria-label="Remove uploaded icon"
-                className="absolute top-1 right-1 hidden cursor-pointer rounded-full bg-white p-0.5 text-[var(--color-ink-3)] shadow-soft hover:text-[var(--color-destructive)] group-hover:block"
+                className="shadow-soft absolute top-1 right-1 hidden cursor-pointer rounded-full bg-white p-0.5 text-[var(--color-ink-3)] group-hover:block hover:text-[var(--color-destructive)]"
               >
                 <X className="h-3 w-3" />
               </button>

@@ -1,19 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LayoutGrid, Type, Upload as UploadIcon } from 'lucide-react';
-import { useDesign } from '@/lib/studio/design';
+import { useDesign, type DesignContent } from '@/lib/studio/design';
+import { useProjects } from '@/lib/studio/projects';
 import { LibraryTab } from './library-tab';
 import { LettersTab } from './letters-tab';
 import { UploadTab } from './upload-tab';
 
 type Tab = 'library' | 'letters' | 'upload';
 
+function tabForContent(content: DesignContent): Tab {
+  if (content.mode === 'letters') return 'letters';
+  if (content.iconSource === 'uploaded') return 'upload';
+  return 'library';
+}
+
 export function Sidebar() {
   const { design, patchContent } = useDesign();
-  const [tab, setTab] = useState<Tab>(
-    design.content.mode === 'letters' ? 'letters' : 'library',
-  );
+  const { currentId } = useProjects();
+  const [tab, setTab] = useState<Tab>(() => tabForContent(design.content));
+  const initializedFor = useRef<string | null>(null);
+
+  // Re-derive the active tab when the project id changes. This covers initial
+  // hydration (the seed project id is replaced by the persisted one after
+  // localStorage loads) and explicit project switches.
+  useEffect(() => {
+    if (initializedFor.current === currentId) return;
+    initializedFor.current = currentId;
+    setTab(tabForContent(design.content));
+  }, [currentId, design.content]);
 
   const switchTab = (next: Tab) => {
     setTab(next);
