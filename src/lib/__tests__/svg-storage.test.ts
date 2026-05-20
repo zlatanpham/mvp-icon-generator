@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SvgStorage } from '../svg-storage';
 import { UploadedSvg } from '../svg-processor';
 
-// Mock sessionStorage
-const mockSessionStorage = (() => {
+// Mock localStorage
+const mockLocalStorage = (() => {
   let store: Record<string, string> = {};
 
   return {
@@ -20,8 +20,8 @@ const mockSessionStorage = (() => {
   };
 })();
 
-Object.defineProperty(window, 'sessionStorage', {
-  value: mockSessionStorage,
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
 });
 
 // Helper to create mock UploadedSvg
@@ -48,16 +48,16 @@ function createMockUploadedSvg(
 
 describe('SvgStorage', () => {
   beforeEach(() => {
-    mockSessionStorage.clear();
+    mockLocalStorage.clear();
   });
 
   describe('saveUploadedSvgs', () => {
-    it('should save single SVG to sessionStorage', () => {
+    it('should save single SVG to localStorage', () => {
       const svg = createMockUploadedSvg();
 
       SvgStorage.saveUploadedSvgs([svg]);
 
-      const stored = mockSessionStorage.getItem('instant-icon-uploaded-svgs');
+      const stored = mockLocalStorage.getItem('instant-icon-uploaded-svgs');
       expect(stored).toBeTruthy();
 
       const parsed = JSON.parse(stored!);
@@ -73,15 +73,15 @@ describe('SvgStorage', () => {
 
       SvgStorage.saveUploadedSvgs(svgs);
 
-      const stored = mockSessionStorage.getItem('instant-icon-uploaded-svgs');
+      const stored = mockLocalStorage.getItem('instant-icon-uploaded-svgs');
       const parsed = JSON.parse(stored!);
       expect(parsed).toHaveLength(10);
     });
 
     it('should handle storage errors gracefully', () => {
       // Mock setItem to throw an error
-      const originalSetItem = mockSessionStorage.setItem;
-      mockSessionStorage.setItem = () => {
+      const originalSetItem = mockLocalStorage.setItem;
+      mockLocalStorage.setItem = () => {
         throw new Error('Storage full');
       };
 
@@ -91,7 +91,7 @@ describe('SvgStorage', () => {
       expect(() => SvgStorage.saveUploadedSvgs([svg])).not.toThrow();
 
       // Restore original method
-      mockSessionStorage.setItem = originalSetItem;
+      mockLocalStorage.setItem = originalSetItem;
     });
   });
 
@@ -116,7 +116,7 @@ describe('SvgStorage', () => {
     });
 
     it('should handle corrupted storage data gracefully', () => {
-      mockSessionStorage.setItem('instant-icon-uploaded-svgs', 'invalid json');
+      mockLocalStorage.setItem('instant-icon-uploaded-svgs', 'invalid json');
 
       const result = SvgStorage.loadUploadedSvgs();
       expect(result).toEqual([]);
@@ -138,8 +138,8 @@ describe('SvgStorage', () => {
 
     it('should handle storage errors gracefully', () => {
       // Mock removeItem to throw an error
-      const originalRemoveItem = mockSessionStorage.removeItem;
-      mockSessionStorage.removeItem = () => {
+      const originalRemoveItem = mockLocalStorage.removeItem;
+      mockLocalStorage.removeItem = () => {
         throw new Error('Storage error');
       };
 
@@ -147,7 +147,7 @@ describe('SvgStorage', () => {
       expect(() => SvgStorage.clearAllUploadedSvgs()).not.toThrow();
 
       // Restore original method
-      mockSessionStorage.removeItem = originalRemoveItem;
+      mockLocalStorage.removeItem = originalRemoveItem;
     });
   });
 

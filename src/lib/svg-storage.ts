@@ -9,6 +9,7 @@ export class SvgStorage {
   private static readonly MAX_STORED_SVGS = 10;
 
   static saveUploadedSvgs(svgs: UploadedSvg[]): void {
+    if (typeof window === 'undefined') return;
     try {
       // Limit the number of stored SVGs
       const svgsToStore = svgs.slice(0, this.MAX_STORED_SVGS);
@@ -23,22 +24,23 @@ export class SvgStorage {
         fileSize: svg.fileSize,
       }));
 
-      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(storageData));
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(storageData));
     } catch (error) {
       console.error('Failed to save uploaded SVGs to storage:', error);
     }
   }
 
   static loadUploadedSvgs(): UploadedSvg[] {
+    if (typeof window === 'undefined') return [];
     try {
-      let stored = sessionStorage.getItem(this.STORAGE_KEY);
+      let stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored === null) {
         // One-time migration from any pre-rename key.
         for (const legacyKey of this.LEGACY_STORAGE_KEYS) {
-          const legacy = sessionStorage.getItem(legacyKey);
+          const legacy = localStorage.getItem(legacyKey);
           if (legacy !== null) {
-            sessionStorage.setItem(this.STORAGE_KEY, legacy);
-            sessionStorage.removeItem(legacyKey);
+            localStorage.setItem(this.STORAGE_KEY, legacy);
+            localStorage.removeItem(legacyKey);
             stored = legacy;
             break;
           }
@@ -87,19 +89,21 @@ export class SvgStorage {
   }
 
   static clearAllUploadedSvgs(): void {
+    if (typeof window === 'undefined') return;
     try {
-      sessionStorage.removeItem(this.STORAGE_KEY);
+      localStorage.removeItem(this.STORAGE_KEY);
     } catch (error) {
       console.error('Failed to clear uploaded SVGs from storage:', error);
     }
   }
 
   static getStorageUsage(): { used: number; available: number } {
+    if (typeof window === 'undefined') return { used: 0, available: 0 };
     try {
-      const stored = sessionStorage.getItem(this.STORAGE_KEY);
+      const stored = localStorage.getItem(this.STORAGE_KEY);
       const used = stored ? new Blob([stored]).size : 0;
 
-      // Estimate available sessionStorage (most browsers allow ~5-10MB)
+      // Estimate available localStorage (most browsers allow ~5-10MB)
       const estimated = 5 * 1024 * 1024; // 5MB estimate
 
       return {
